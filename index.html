@@ -3,9 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>文件目录</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { padding: 2rem; max-width: 1000px; margin: 0 auto; }
+        h1 { margin-bottom: 1.5rem; color: #333; }
+        .file-list { list-style: none; }
+        .file-list li {
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        .file-list li a {
+            text-decoration: none;
+            color: #1a73e8;
+            font-size: 1rem;
+        }
+        .file-list li a:hover { text-decoration: underline; }
+        .size { color: #666; font-size: 0.9rem; }
+    </style>
 </head>
 <body>
-    <h1>Hello World</h1>
+    <h1>当前目录文件列表</h1>
+    <ul class="file-list" id="fileList"></ul>
+
+    <script>
+        // 自动列出当前目录下所有文件
+        document.addEventListener('DOMContentLoaded', async () => {
+            const fileList = document.getElementById('fileList');
+            
+            try {
+                // 读取当前目录文件
+                const response = await fetch('./', { method: 'GET' });
+                const html = await response.text();
+                
+                // 解析页面中的文件链接
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a');
+                
+                for (const link of links) {
+                    const href = link.getAttribute('href');
+                    if (!href || href === '../') continue;
+                    
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = href;
+                    a.target = '_blank';
+                    a.textContent = href;
+                    
+                    li.appendChild(a);
+                    fileList.appendChild(li);
+                }
+            } catch (err) {
+                fileList.innerHTML = '<li>无法加载文件列表</li>';
+                console.error(err);
+            }
+        });
+    </script>
 </body>
 </html>
