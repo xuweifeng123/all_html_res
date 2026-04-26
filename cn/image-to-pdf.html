@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>图片转PDF工具 - 本地转换，隐私安全 | JPG/PNG to PDF</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            padding: 1.5rem 1rem;
+            color: #0f172a;
+        }
+
+        .image-to-pdf-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            padding: 1.8rem 2rem;
+        }
+
+        @media (max-width: 640px) {
+            .image-to-pdf-container {
+                padding: 1.25rem;
+            }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #1e293b, #2c3e66);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub-desc {
+            text-align: center;
+            color: #475569;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e9edf2;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* 上传区域 */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 1.25rem;
+            background: #fafcff;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 1rem 0 0.8rem 0;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: #f0f7ff;
+            transform: scale(0.99);
+        }
+        .upload-icon svg {
+            width: 52px;
+            height: 52px;
+            stroke: #5b6e8c;
+            margin-bottom: 0.75rem;
+        }
+        .upload-zone p {
+            margin: 0.5rem 0;
+            color: #334155;
+            font-weight: 500;
+        }
+        .file-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        /* 图片列表区域 */
+        .images-panel {
+            margin-top: 1.8rem;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+        .images-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .image-card {
+            background: white;
+            border: 1px solid #eef2f8;
+            border-radius: 1rem;
+            padding: 0.8rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+        }
+        .image-card:hover {
+            border-color: #cbdff2;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .preview-thumb {
+            width: 64px;
+            height: 64px;
+            border-radius: 0.6rem;
+            object-fit: cover;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .img-info {
+            flex: 1;
+        }
+        .img-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #0f172a;
+            word-break: break-all;
+        }
+        .img-meta {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 0.2rem;
+        }
+        .img-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-up {
+            color: #2563eb;
+        }
+        .action-down {
+            color: #2563eb;
+        }
+        .action-remove {
+            color: #dc2626;
+        }
+        .action-btn:hover {
+            background: #e2e8f0;
+        }
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* 设置卡片 */
+        .settings-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1.2rem 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid #eef2f8;
+        }
+        .settings-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: #1e293b;
+        }
+        .settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.85rem;
+        }
+        select, .setting-item input {
+            padding: 0.35rem 0.6rem;
+            border-radius: 0.5rem;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.8rem;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1rem 0 0.5rem;
+        }
+        .btn-primary {
+            background: #27ae60;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-primary:hover {
+            background: #1e9b55;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: #3b82f6;
+            border: none;
+            padding: 0.7rem 2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+
+        /* 进度 */
+        .progress-area {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1.8rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .progress-bar-bg {
+            width: 80%;
+            margin: 1rem auto;
+            background: #e2e8f0;
+            border-radius: 20px;
+            overflow: hidden;
+            height: 8px;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 8px;
+            background: #27ae60;
+            transition: width 0.2s;
+        }
+
+        /* 结果区域 */
+        .result-card {
+            background: #e6f7ec;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .result-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* FAQ */
+        .faq-section {
+            margin-top: 2.5rem;
+            background: #f9fbfe;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            border: 1px solid #edf2f7;
+        }
+        .faq-section h2 {
+            font-size: 1.4rem;
+            text-align: left;
+            background: none;
+            color: #0f172a;
+            margin-bottom: 1rem;
+        }
+        .faq-item {
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+        .faq-item h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .faq-item p {
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.45;
+        }
+        .highlight {
+            color: #2c7a4d;
+            font-weight: 500;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 1.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #ecf3f9;
+        }
+    </style>
+    <!-- PDF-Lib 库：完全本地生成PDF -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+<div class="image-to-pdf-container">
+    <h2>📸 图片转PDF · 本地转换</h2>
+    <div class="sub-desc">
+        支持 JPG, PNG, GIF, BMP, WebP — 100% 本地处理，不上传服务器
+    </div>
+
+    <!-- 上传区域 -->
+    <div id="uploadZone" class="upload-zone">
+        <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 21h14" stroke="currentColor"/>
+                <rect x="4" y="14" width="16" height="4" rx="1" stroke="currentColor"/>
+            </svg>
+        </div>
+        <p>点击或拖拽图片至此区域 (可多选)</p>
+        <input type="file" id="imageFileInput" accept="image/jpeg,image/jpg,image/png,image/gif,image/bmp,image/webp" multiple style="display: none;">
+        <div class="file-hint">最多50张图片，单张不超过20MB · 完全隐私保护</div>
+    </div>
+
+    <!-- 图片列表 + 转换面板 -->
+    <div id="imagesPanel" class="images-panel" style="display: none;">
+        <div class="panel-header">
+            <h3 style="font-size: 1.2rem;">📋 待转换图片 (<span id="imageCount">0</span>)</h3>
+            <button id="clearAllBtn" class="clear-btn">🗑️ 清空全部</button>
+        </div>
+        <div id="imagesGrid" class="images-grid"></div>
+
+        <!-- PDF 设置 -->
+        <div class="settings-card">
+            <div class="settings-title">⚙️ PDF 选项</div>
+            <div class="settings-row">
+                <div class="setting-item">
+                    <span>📄 页面尺寸：</span>
+                    <select id="pageSizeSelect">
+                        <option value="auto">自动 (适应图片尺寸)</option>
+                        <option value="a4">A4 (210x297mm)</option>
+                        <option value="letter">Letter (8.5x11in)</option>
+                        <option value="legal">Legal (8.5x14in)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <span>🎨 图片质量：</span>
+                    <select id="qualitySelect">
+                        <option value="high">高 (最佳画质)</option>
+                        <option value="medium" selected>中 (平衡)</option>
+                        <option value="low">低 (较小文件)</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label><input type="checkbox" id="fitToPageCheckbox"> 适应页面 (等比缩放)</label>
+                </div>
+                <div class="setting-item">
+                    <label><input type="checkbox" id="centerImageCheckbox" checked> 居中图片</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button id="convertBtn" class="btn-primary">🔄 开始转换PDF</button>
+            <button id="addMoreBtn" class="btn-secondary">➕ 继续添加图片</button>
+        </div>
+    </div>
+
+    <!-- 进度条区域 -->
+    <div id="progressArea" style="display: none;">
+        <div class="progress-area">
+            <div class="spinner"></div>
+            <p id="progressMsg" style="margin-bottom: 0.8rem;">正在处理图片...</p>
+            <div class="progress-bar-bg">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果区域 -->
+    <div id="resultArea" style="display: none;">
+        <div class="result-card">
+            <div style="font-size: 3rem;">✅</div>
+            <h3 style="color: #2e7d32;">转换完成！</h3>
+            <p id="resultSummary" style="margin: 0.5rem 0;"></p>
+            <div class="result-buttons">
+                <button id="downloadPdfBtn" class="btn-primary">📥 下载 PDF</button>
+                <button id="convertAgainBtn" class="btn-secondary">🔄 转换新图片</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ 中文区域 -->
+    <div class="faq-section">
+        <h2>❓ 常见问题</h2>
+        <div class="faq-item">
+            <h3>我的图片会上传到服务器吗？</h3>
+            <p>绝对不会！本工具<span class="highlight">100% 在浏览器本地运行</span>，使用 PDF-Lib 库在您的设备上直接生成 PDF。图片永不离开您的电脑，无服务器上传，确保隐私安全。</p>
+        </div>
+        <div class="faq-item">
+            <h3>支持哪些图片格式？</h3>
+            <p>支持 <span class="highlight">JPG, JPEG, PNG, GIF, BMP, WebP</span>。所有格式都会在本地转换成高质量PDF。</p>
+        </div>
+        <div class="faq-item">
+            <h3>可以调整图片顺序吗？</h3>
+            <p>可以，每个图片卡片都配有 ↑ 和 ↓ 按钮，可自由调整顺序，PDF 页序与列表顺序一致。</p>
+        </div>
+        <div class="faq-item">
+            <h3>一次能转换多少图片？</h3>
+            <p>最多支持 <span class="highlight">50 张图片</span>，每张图片不超过 20MB，以获得最佳性能和稳定性。</p>
+        </div>
+        <div class="faq-item">
+            <h3>能否自定义页面大小？</h3>
+            <p>内置 A4、Letter、Legal 以及“自动”模式。自动模式下每一页的尺寸完全匹配原始图片尺寸。同时支持“适应页面”和“居中”选项。</p>
+        </div>
+        <div class="faq-item">
+            <h3>转换后图片会留存在电脑上吗？</h3>
+            <p>转换过程仅存在于浏览器内存中，点击“下载 PDF”后您保存到本地。关闭页面后所有图片数据自动清除，不留下任何痕迹。</p>
+        </div>
+    </div>
+    <footer>
+        🔒 本地生成 PDF · 无上传 · 无追踪 · 用完即焚
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // ---------- DOM 元素 ----------
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('imageFileInput');
+        const imagesPanel = document.getElementById('imagesPanel');
+        const imagesGrid = document.getElementById('imagesGrid');
+        const imageCountSpan = document.getElementById('imageCount');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const addMoreBtn = document.getElementById('addMoreBtn');
+        const convertBtn = document.getElementById('convertBtn');
+        const progressArea = document.getElementById('progressArea');
+        const resultArea = document.getElementById('resultArea');
+        const progressMsg = document.getElementById('progressMsg');
+        const progressFill = document.getElementById('progressFill');
+        const resultSummary = document.getElementById('resultSummary');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const convertAgainBtn = document.getElementById('convertAgainBtn');
+        
+        // 设置项
+        const pageSizeSelect = document.getElementById('pageSizeSelect');
+        const qualitySelect = document.getElementById('qualitySelect');
+        const fitToPageCheckbox = document.getElementById('fitToPageCheckbox');
+        const centerImageCheckbox = document.getElementById('centerImageCheckbox');
+
+        // ---------- 全局变量 ----------
+        let imagesArray = [];          // 存储 { id, file, name, size, width, height, url, type }
+        let generatedPdfBytes = null;  // 生成的PDF字节
+        
+        // 辅助函数
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+        
+        // 加载图片获取真实宽高
+        function loadImageFromFile(file) {
+            return new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onload = () => {
+                    resolve({ width: img.width, height: img.height, url });
+                };
+                img.onerror = () => reject(new Error(`图片加载失败: ${file.name}`));
+                img.src = url;
+            });
+        }
+        
+        // 添加图片
+        async function addImages(files) {
+            if (!files.length) return;
+            if (imagesArray.length + files.length > 50) {
+                alert('最多只能添加 50 张图片，请减少数量');
+                return;
+            }
+            // 大小校验
+            for (let f of files) {
+                if (f.size > 20 * 1024 * 1024) {
+                    alert(`图片 ${f.name} 超过 20MB 限制`);
+                    return;
+                }
+                if (!f.type.startsWith('image/')) {
+                    alert(`文件 ${f.name} 不是有效图片`);
+                    return;
+                }
+            }
+            
+            for (let file of files) {
+                try {
+                    const { width, height, url } = await loadImageFromFile(file);
+                    imagesArray.push({
+                        id: Date.now() + Math.random() + file.name,
+                        file: file,
+                        name: file.name,
+                        size: file.size,
+                        width: width,
+                        height: height,
+                        url: url,
+                        type: file.type
+                    });
+                } catch (err) {
+                    console.error(err);
+                    alert(`无法加载图片 ${file.name}，请检查文件是否损坏`);
+                }
+            }
+            renderImageList();
+            if (imagesArray.length > 0) {
+                imagesPanel.style.display = 'block';
+                resultArea.style.display = 'none';
+                progressArea.style.display = 'none';
+            }
+        }
+        
+        // 渲染列表
+        function renderImageList() {
+            if (!imagesGrid) return;
+            imageCountSpan.innerText = imagesArray.length;
+            if (imagesArray.length === 0) {
+                imagesPanel.style.display = 'none';
+                return;
+            }
+            imagesPanel.style.display = 'block';
+            imagesGrid.innerHTML = '';
+            
+            imagesArray.forEach((img, idx) => {
+                const card = document.createElement('div');
+                card.className = 'image-card';
+                
+                const thumb = document.createElement('img');
+                thumb.className = 'preview-thumb';
+                thumb.src = img.url;
+                thumb.alt = img.name;
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'img-info';
+                infoDiv.innerHTML = `
+                    <div class="img-name">${escapeHtml(img.name)}</div>
+                    <div class="img-meta">${formatFileSize(img.size)} · ${img.width} x ${img.height} · ${img.type.split('/')[1].toUpperCase()}</div>
+                `;
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'img-actions';
+                
+                const upBtn = document.createElement('button');
+                upBtn.textContent = '↑ 上移';
+                upBtn.className = 'action-btn action-up';
+                upBtn.disabled = idx === 0;
+                upBtn.onclick = () => moveImage(idx, idx - 1);
+                
+                const downBtn = document.createElement('button');
+                downBtn.textContent = '↓ 下移';
+                downBtn.className = 'action-btn action-down';
+                downBtn.disabled = idx === imagesArray.length - 1;
+                downBtn.onclick = () => moveImage(idx, idx + 1);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '移除';
+                removeBtn.className = 'action-btn action-remove';
+                removeBtn.onclick = () => removeImage(idx);
+                
+                actionsDiv.appendChild(upBtn);
+                actionsDiv.appendChild(downBtn);
+                actionsDiv.appendChild(removeBtn);
+                
+                card.appendChild(thumb);
+                card.appendChild(infoDiv);
+                card.appendChild(actionsDiv);
+                imagesGrid.appendChild(card);
+            });
+        }
+        
+        // 移动图片
+        function moveImage(from, to) {
+            if (to < 0 || to >= imagesArray.length) return;
+            const temp = imagesArray[from];
+            imagesArray[from] = imagesArray[to];
+            imagesArray[to] = temp;
+            renderImageList();
+        }
+        
+        function removeImage(index) {
+            const img = imagesArray[index];
+            if (img && img.url) URL.revokeObjectURL(img.url);
+            imagesArray.splice(index, 1);
+            renderImageList();
+            if (imagesArray.length === 0) {
+                imagesPanel.style.display = 'none';
+                resultArea.style.display = 'none';
+                generatedPdfBytes = null;
+            }
+        }
+        
+        function clearAllImages() {
+            for (let img of imagesArray) {
+                if (img.url) URL.revokeObjectURL(img.url);
+            }
+            imagesArray = [];
+            renderImageList();
+            imagesPanel.style.display = 'none';
+            resultArea.style.display = 'none';
+            progressArea.style.display = 'none';
+            generatedPdfBytes = null;
+        }
+        
+        // 转换核心
+        async function convertToPdf() {
+            if (imagesArray.length === 0) {
+                alert('请先添加图片');
+                return;
+            }
+            
+            // 隐藏面板和结果，显示进度
+            imagesPanel.style.display = 'none';
+            resultArea.style.display = 'none';
+            progressArea.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressMsg.innerText = '准备 PDF 文档...';
+            
+            try {
+                const pdfDoc = await PDFLib.PDFDocument.create();
+                const pageSize = pageSizeSelect.value;
+                const quality = qualitySelect.value;
+                const fitToPage = fitToPageCheckbox.checked;
+                const centerImage = centerImageCheckbox.checked;
+                
+                // 获取预定义尺寸 (points)
+                let presetWidth = 0, presetHeight = 0;
+                if (pageSize !== 'auto') {
+                    const dims = {
+                        a4: { width: 595.28, height: 841.89 },
+                        letter: { width: 612, height: 792 },
+                        legal: { width: 612, height: 1008 }
+                    };
+                    presetWidth = dims[pageSize].width;
+                    presetHeight = dims[pageSize].height;
+                }
+                
+                const total = imagesArray.length;
+                for (let i = 0; i < total; i++) {
+                    const img = imagesArray[i];
+                    progressMsg.innerText = `处理图片 ${i+1}/${total}: ${img.name}`;
+                    const percent = (i / total) * 100;
+                    progressFill.style.width = `${percent}%`;
+                    
+                    // 获取图片字节
+                    let imageBytes;
+                    try {
+                        const resp = await fetch(img.url);
+                        imageBytes = await resp.arrayBuffer();
+                    } catch(e) {
+                        throw new Error(`读取图片失败: ${img.name}`);
+                    }
+                    
+                    let pdfImage;
+                    const mime = img.type;
+                    if (mime === 'image/png') {
+                        pdfImage = await pdfDoc.embedPng(imageBytes);
+                    } else if (mime === 'image/jpeg' || mime === 'image/jpg') {
+                        let jpegQuality = 0.8;
+                        if (quality === 'high') jpegQuality = 1.0;
+                        if (quality === 'low') jpegQuality = 0.6;
+                        pdfImage = await pdfDoc.embedJpg(imageBytes, { quality: jpegQuality });
+                    } else {
+                        // 对于 GIF, BMP, WebP，利用 canvas 转 PNG 再嵌入 (保证兼容)
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const loadImg = await new Promise((resolve, reject) => {
+                            const tempImg = new Image();
+                            tempImg.onload = () => resolve(tempImg);
+                            tempImg.onerror = () => reject(new Error(`转换失败: ${img.name}`));
+                            tempImg.src = img.url;
+                        });
+                        canvas.width = loadImg.width;
+                        canvas.height = loadImg.height;
+                        ctx.drawImage(loadImg, 0, 0);
+                        const pngDataUrl = canvas.toDataURL('image/png');
+                        const base64Data = pngDataUrl.split(',')[1];
+                        const binary = atob(base64Data);
+                        const array = new Uint8Array(binary.length);
+                        for (let j = 0; j < binary.length; j++) array[j] = binary.charCodeAt(j);
+                        pdfImage = await pdfDoc.embedPng(array);
+                    }
+                    
+                    let imgWidth = pdfImage.width;
+                    let imgHeight = pdfImage.height;
+                    let pageWidth, pageHeight;
+                    let xOffset = 0, yOffset = 0;
+                    
+                    if (pageSize === 'auto') {
+                        pageWidth = imgWidth;
+                        pageHeight = imgHeight;
+                    } else {
+                        pageWidth = presetWidth;
+                        pageHeight = presetHeight;
+                        if (fitToPage) {
+                            const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+                            imgWidth = imgWidth * scale;
+                            imgHeight = imgHeight * scale;
+                        }
+                        if (centerImage) {
+                            xOffset = (pageWidth - imgWidth) / 2;
+                            yOffset = (pageHeight - imgHeight) / 2;
+                        }
+                    }
+                    
+                    const page = pdfDoc.addPage([pageWidth, pageHeight]);
+                    page.drawImage(pdfImage, {
+                        x: xOffset,
+                        y: yOffset,
+                        width: imgWidth,
+                        height: imgHeight
+                    });
+                    
+                    // 让 UI 有机会更新
+                    await new Promise(r => setTimeout(r, 5));
+                }
+                
+                progressMsg.innerText = '正在生成PDF文件...';
+                progressFill.style.width = '100%';
+                generatedPdfBytes = await pdfDoc.save();
+                
+                const totalSize = generatedPdfBytes.length;
+                resultSummary.innerHTML = `成功转换 ${total} 张图片 → PDF<br>总页数: ${total} 页 · 文件大小: ${formatFileSize(totalSize)}`;
+                progressArea.style.display = 'none';
+                resultArea.style.display = 'block';
+                
+            } catch (error) {
+                console.error(error);
+                alert('转换失败：' + (error.message || '未知错误，请刷新重试'));
+                progressArea.style.display = 'none';
+                imagesPanel.style.display = 'block';
+                generatedPdfBytes = null;
+            }
+        }
+        
+        function downloadPdf() {
+            if (!generatedPdfBytes) {
+                alert('没有可下载的PDF，请先转换');
+                return;
+            }
+            const blob = new Blob([generatedPdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `converted_${imagesArray.length}images.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        
+        function resetForNewConversion() {
+            clearAllImages();
+            generatedPdfBytes = null;
+            resultArea.style.display = 'none';
+            imagesPanel.style.display = 'none';
+            progressArea.style.display = 'none';
+        }
+        
+        // 事件绑定
+        uploadZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length) {
+                addImages(Array.from(e.target.files));
+            }
+            fileInput.value = '';
+        });
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#3b82f6';
+            uploadZone.style.background = '#f0f7ff';
+        });
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.style.borderColor = '#cbd5e1';
+            uploadZone.style.background = '#fafcff';
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#cbd5e1';
+            uploadZone.style.background = '#fafcff';
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            if (files.length) addImages(files);
+            else alert('请拖拽图片文件');
+        });
+        
+        clearAllBtn.addEventListener('click', clearAllImages);
+        addMoreBtn.addEventListener('click', () => fileInput.click());
+        convertBtn.addEventListener('click', convertToPdf);
+        downloadPdfBtn.addEventListener('click', downloadPdf);
+        convertAgainBtn.addEventListener('click', resetForNewConversion);
+        
+        // 初始状态
+        imagesPanel.style.display = 'none';
+        resultArea.style.display = 'none';
+        progressArea.style.display = 'none';
+    })();
+</script>
+</body>
+</html>

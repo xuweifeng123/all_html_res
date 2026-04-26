@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>HEIC to JPG Converter - Convert Apple Photos to JPG | 100% Local</title>
+    <meta name="description" content="Free online HEIC/HEIF/LIVP to JPG converter. Convert Apple iPhone photos to JPG format with 100% local processing - no upload, no server storage.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .upload-area svg {
+            width: 48px;
+            height: 48px;
+            stroke: #666;
+        }
+
+        .settings-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .settings-panel h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .quality-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quality-row label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .quality-row input {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .quality-value {
+            color: #3498db;
+            font-weight: 500;
+            min-width: 45px;
+        }
+
+        .warning-tip {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 13px;
+            color: #856404;
+            margin-top: 15px;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8f5e9;
+        }
+
+        .results-header h3 {
+            color: #2e7d32;
+        }
+
+        .btn-clear {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-clear:hover {
+            background: #c0392b;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .result-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .result-preview {
+            width: 100%;
+            height: 160px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f8f9fa;
+            margin-bottom: 12px;
+        }
+
+        .result-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .result-sizes {
+            font-size: 12px;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .size-original {
+            color: #e74c3c;
+        }
+
+        .size-converted {
+            color: #27ae60;
+            font-weight: 500;
+        }
+
+        .saved-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .download-link {
+            display: block;
+            width: 100%;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .download-link:hover {
+            background: #2980b9;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .spinner-small {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #3498db;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-card {
+            border-color: #e74c3c;
+            background: #fef5f5;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .faq-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .faq-section h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .faq-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .faq-item h4::before {
+            content: "❓";
+            font-size: 14px;
+            color: #3498db;
+        }
+
+        .faq-item p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+            margin-left: 26px;
+        }
+
+        .highlight {
+            color: #3498db;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 24px 20px; }
+            h1 { font-size: 24px; }
+            .results-grid { grid-template-columns: 1fr; }
+            .quality-row { flex-direction: column; align-items: flex-start; }
+            .quality-row input { max-width: 100%; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>HEIC/HEIF/LIVP to JPG Converter <span class="badge">100% Local</span></h1>
+    <p class="subtitle">Convert Apple iPhone HEIC, HEIF, and LIVP photos to JPG format. All processing happens in your browser - no upload, no server storage.</p>
+
+    <div class="upload-area" id="upload-area">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 21h14"/>
+            <rect x="4" y="14" width="16" height="4" rx="1"/>
+        </svg>
+        <p style="margin: 12px 0; font-weight: 500;">Click or drag & drop HEIC/HEIF/LIVP files here</p>
+        <input type="file" id="file-input" accept=".heic,.heif,.livp,image/heic,image/heif" multiple style="display: none;">
+        <p style="font-size: 12px; color: #999; margin-top: 8px;">Supports HEIC, HEIF, LIVP | Max 20 files | 50MB per file</p>
+    </div>
+
+    <div class="settings-panel">
+        <h3>⚙️ Conversion Settings</h3>
+        <div class="quality-row">
+            <label>JPG Quality:</label>
+            <input type="range" id="jpg-quality" min="30" max="100" value="85">
+            <span class="quality-value" id="quality-value">85%</span>
+        </div>
+        <div class="warning-tip">
+            💡 <strong>Note:</strong> LIVP (Live Photos) are ZIP archives containing a HEIC image and a MOV video. This tool extracts the HEIC image and converts it to JPG.
+        </div>
+    </div>
+
+    <div class="results-section" id="results-section">
+        <div class="results-header">
+            <h3>📥 Converted Images</h3>
+            <button class="btn-clear" id="clear-all-results">🗑️ Clear All</button>
+        </div>
+        <div class="results-grid" id="results-grid">
+            <div class="loading-indicator">Drop HEIC/HEIF/LIVP files here to start conversion...</div>
+        </div>
+    </div>
+
+    <div class="faq-section">
+        <h3>❓ Frequently Asked Questions</h3>
+        <div class="faq-item">
+            <h4>What are HEIC, HEIF, and LIVP files?</h4>
+            <p><span class="highlight">HEIC/HEIF</span> is Apple's default photo format on iPhones (iOS 11 and later). <span class="highlight">LIVP</span> is Apple's Live Photo format - a ZIP archive containing a HEIC image and a MOV video.</p>
+        </div>
+        <div class="faq-item">
+            <h4>Is my photo uploaded to your server?</h4>
+            <p>No, absolutely not. Our converter works <span class="highlight">100% locally in your browser</span>. Your photos never leave your device.</p>
+        </div>
+        <div class="faq-item">
+            <h4>What happens to my Live Photos (LIVP)?</h4>
+            <p>LIVP files are ZIP archives. This tool extracts the <span class="highlight">HEIC image</span> from the archive and converts it to JPG. The video component is not preserved.</p>
+        </div>
+        <div class="faq-item">
+            <h4>Why convert HEIC to JPG?</h4>
+            <p>JPG is a universal format supported by all devices, websites, and software. Converting HEIC to JPG ensures your photos can be viewed anywhere.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 使用 heic2any + JSZip 组合方案 -->
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+    // DOM 元素
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const resultsSection = document.getElementById('results-section');
+    const resultsGrid = document.getElementById('results-grid');
+    const clearAllBtn = document.getElementById('clear-all-results');
+    const qualitySlider = document.getElementById('jpg-quality');
+    const qualityValue = document.getElementById('quality-value');
+
+    // 状态
+    let isConverting = false;
+    let convertedResults = [];
+
+    // 质量滑块显示
+    qualitySlider.addEventListener('input', () => {
+        qualityValue.textContent = qualitySlider.value + '%';
+    });
+
+    // 检查是否为 LIVP 文件（ZIP 格式）
+    function isLIVPFile(file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        return ext === 'livp';
+    }
+
+    // 检查是否为 HEIC/HEIF 文件
+    function isHEICFile(file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        const type = file.type.toLowerCase();
+        return ext === 'heic' || ext === 'heif' || type === 'image/heic' || type === 'image/heif';
+    }
+
+    // 从 LIVP (ZIP) 文件中提取 HEIC 文件
+    async function extractHEICFromLIVP(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const arrayBuffer = e.target.result;
+                    const zip = await JSZip.loadAsync(arrayBuffer);
+                    
+                    // 查找 .heic 文件
+                    let heicFile = null;
+                    let heicFileName = null;
+                    
+                    for (const [filename, zipEntry] of Object.entries(zip.files)) {
+                        if (filename.toLowerCase().endsWith('.heic')) {
+                            heicFileName = filename;
+                            heicFile = zipEntry;
+                            break;
+                        }
+                    }
+                    
+                    if (!heicFile) {
+                        reject(new Error('No HEIC file found inside LIVP archive'));
+                        return;
+                    }
+                    
+                    // 提取 HEIC 文件
+                    const heicBlob = await heicFile.async('blob');
+                    resolve(heicBlob);
+                    
+                } catch (error) {
+                    console.error('LIVP extraction error:', error);
+                    reject(new Error('Failed to extract HEIC from LIVP file: ' + error.message));
+                }
+            };
+            reader.onerror = () => reject(new Error('Failed to read LIVP file'));
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    // 使用 heic2any 转换 HEIC 到 JPG
+    async function convertHEICToJPG(heicBlob, quality) {
+        return new Promise((resolve, reject) => {
+            const qualityNum = quality / 100;
+            
+            heic2any({
+                blob: heicBlob,
+                toType: 'image/jpeg',
+                quality: qualityNum
+            }).then(result => {
+                // heic2any 可能返回单个 Blob 或 Blob 数组
+                let jpgBlob = result;
+                if (Array.isArray(result) && result.length > 0) {
+                    jpgBlob = result[0];
+                }
+                resolve(jpgBlob);
+            }).catch(error => {
+                console.error('HEIC conversion error:', error);
+                reject(new Error('Failed to convert HEIC to JPG: ' + error.message));
+            });
+        });
+    }
+
+    // 处理单个文件（自动检测类型）
+    async function processSingleFile(file, quality) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        
+        try {
+            let heicBlob;
+            
+            if (ext === 'livp') {
+                // LIVP 文件：先解压提取 HEIC
+                heicBlob = await extractHEICFromLIVP(file);
+            } else if (ext === 'heic' || ext === 'heif') {
+                // HEIC/HEIF 文件：直接使用
+                heicBlob = file;
+            } else {
+                throw new Error('Unsupported file format: ' + ext);
+            }
+            
+            // 转换为 JPG
+            const jpgBlob = await convertHEICToJPG(heicBlob, quality);
+            
+            // 生成新文件名
+            const nameWithoutExt = file.name.replace(/\.(heic|heif|livp)$/i, '');
+            const downloadName = `${nameWithoutExt}.jpg`;
+            
+            return {
+                success: true,
+                originalName: file.name,
+                originalSize: file.size,
+                convertedSize: jpgBlob.size,
+                convertedBlob: jpgBlob,
+                downloadName: downloadName,
+                convertedUrl: URL.createObjectURL(jpgBlob)
+            };
+            
+        } catch (error) {
+            console.error(`Error processing ${file.name}:`, error);
+            return {
+                success: false,
+                originalName: file.name,
+                originalSize: file.size,
+                errorMessage: error.message || 'Conversion failed'
+            };
+        }
+    }
+
+    // 上传区域事件
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#3498db';
+        uploadArea.style.background = '#f0f8ff';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#ccc';
+        uploadArea.style.background = 'transparent';
+    });
+
+    uploadArea.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#ccc';
+        uploadArea.style.background = 'transparent';
+        
+        const files = Array.from(e.dataTransfer.files).filter(f => {
+            const ext = f.name.split('.').pop().toLowerCase();
+            return ext === 'heic' || ext === 'heif' || ext === 'livp';
+        });
+        
+        if (files.length > 0) {
+            await processFiles(files);
+        } else if (e.dataTransfer.files.length > 0) {
+            alert('Please upload valid HEIC, HEIF, or LIVP files');
+        }
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+        if (e.target.files.length > 0) {
+            const files = Array.from(e.target.files).filter(f => {
+                const ext = f.name.split('.').pop().toLowerCase();
+                return ext === 'heic' || ext === 'heif' || ext === 'livp';
+            });
+            if (files.length !== e.target.files.length) {
+                alert('Some files were skipped. Only HEIC, HEIF, and LIVP files are supported.');
+            }
+            await processFiles(files);
+        }
+        fileInput.value = '';
+    });
+
+    // 处理文件
+    async function processFiles(files) {
+        if (files.length === 0) return;
+        
+        const currentCount = convertedResults.length;
+        if (currentCount + files.length > 20) {
+            alert(`Maximum 20 files allowed. You already have ${currentCount}, can add ${20 - currentCount} more.`);
+            return;
+        }
+        
+        for (const file of files) {
+            if (file.size > 50 * 1024 * 1024) {
+                alert(`File "${file.name}" exceeds 50MB limit`);
+                return;
+            }
+        }
+        
+        await convertFiles(files);
+    }
+
+    // 转换文件
+    async function convertFiles(files) {
+        if (isConverting) {
+            alert('Conversion in progress, please wait...');
+            return;
+        }
+        
+        isConverting = true;
+        
+        resultsSection.style.display = 'block';
+        resultsGrid.innerHTML = `
+            <div class="loading-indicator">
+                <div class="spinner-small"></div> Processing ${files.length} file(s)...
+            </div>
+        `;
+        
+        const newResults = [];
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const quality = parseInt(qualitySlider.value);
+            
+            resultsGrid.innerHTML = `
+                <div class="loading-indicator">
+                    <div class="spinner-small"></div> Processing ${i + 1}/${files.length}: ${escapeHtml(file.name)}
+                </div>
+            `;
+            
+            const result = await processSingleFile(file, quality);
+            
+            newResults.push({
+                id: Date.now() + Math.random() + i,
+                ...result
+            });
+            
+            await new Promise(r => setTimeout(r, 10));
+        }
+        
+        convertedResults = [...convertedResults, ...newResults];
+        renderResults();
+        isConverting = false;
+    }
+
+    // 渲染结果
+    function renderResults() {
+        if (convertedResults.length === 0) {
+            resultsSection.style.display = 'none';
+            return;
+        }
+        
+        resultsSection.style.display = 'block';
+        resultsGrid.innerHTML = '';
+        
+        convertedResults.forEach((result) => {
+            const card = document.createElement('div');
+            card.className = 'result-card';
+            if (!result.success) card.classList.add('error-card');
+            card.setAttribute('data-id', result.id);
+            
+            if (!result.success) {
+                card.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #e74c3c;">
+                        <div style="font-size: 48px;">⚠️</div>
+                        <div class="result-name">${escapeHtml(result.originalName)}</div>
+                        <div class="result-sizes">
+                            <span class="size-original">Original: ${formatFileSize(result.originalSize)}</span>
+                        </div>
+                        <div class="error-message">${escapeHtml(result.errorMessage)}</div>
+                    </div>
+                `;
+            } else {
+                const percentChange = result.originalSize > 0 
+                    ? Math.round((1 - result.convertedSize / result.originalSize) * 100) 
+                    : 0;
+                
+                card.innerHTML = `
+                    <img class="result-preview" src="${result.convertedUrl}" alt="${escapeHtml(result.downloadName)}">
+                    <div class="result-name" title="${escapeHtml(result.originalName)}">${escapeHtml(result.originalName)}</div>
+                    <div class="result-sizes">
+                        <span class="size-original">Original: ${formatFileSize(result.originalSize)}</span><br>
+                        <span class="size-converted">JPG: ${formatFileSize(result.convertedSize)}</span>
+                        <span class="saved-badge">${percentChange > 0 ? '↓ ' + percentChange + '%' : (percentChange < 0 ? '↑ ' + Math.abs(percentChange) + '%' : 'Same size')}</span>
+                    </div>
+                    <button class="download-link" data-id="${result.id}">📥 Download JPG</button>
+                `;
+            }
+            
+            resultsGrid.appendChild(card);
+        });
+        
+        document.querySelectorAll('.download-link').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseFloat(btn.getAttribute('data-id'));
+                downloadImage(id);
+            });
+        });
+    }
+
+    // 下载单张图片
+    function downloadImage(id) {
+        const result = convertedResults.find(r => r.id === id);
+        if (result && result.success && result.convertedUrl) {
+            const link = document.createElement('a');
+            link.href = result.convertedUrl;
+            link.download = result.downloadName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+
+    // 清空所有结果
+    function clearAllResults() {
+        convertedResults.forEach(result => {
+            if (result.convertedUrl) {
+                URL.revokeObjectURL(result.convertedUrl);
+            }
+        });
+        convertedResults = [];
+        resultsSection.style.display = 'none';
+        resultsGrid.innerHTML = '<div class="loading-indicator">Drop HEIC/HEIF/LIVP files here to start conversion...</div>';
+    }
+
+    // 工具函数
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    clearAllBtn.addEventListener('click', clearAllResults);
+</script>
+</body>
+</html>

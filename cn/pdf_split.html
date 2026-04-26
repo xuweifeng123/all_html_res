@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>PDF分割工具 - 本地分割，隐私安全 | 在线拆分PDF文件</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            padding: 1.5rem 1rem;
+            color: #0f172a;
+        }
+
+        .pdf-splitter-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            padding: 1.8rem 2rem;
+        }
+
+        @media (max-width: 640px) {
+            .pdf-splitter-container {
+                padding: 1.25rem;
+            }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            background: linear-gradient(135deg, #1e293b, #2c3e66);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub-desc {
+            text-align: center;
+            color: #475569;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e9edf2;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* 上传区域 */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 1.25rem;
+            background: #fafcff;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 1rem 0 0.8rem 0;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: #f0f7ff;
+            transform: scale(0.99);
+        }
+        .upload-icon svg {
+            width: 52px;
+            height: 52px;
+            stroke: #5b6e8c;
+            margin-bottom: 0.75rem;
+        }
+        .upload-zone p {
+            margin: 0.5rem 0;
+            color: #334155;
+            font-weight: 500;
+        }
+        .file-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        /* PDF 信息栏 */
+        .info-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.8rem;
+            border: 1px solid #e9edf2;
+        }
+        .clear-pdf-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* 模式按钮组 */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+        .mode-btn {
+            padding: 0.7rem;
+            border-radius: 2rem;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+        .mode-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 2px 6px rgba(59,130,246,0.3);
+        }
+
+        /* 模式面板 */
+        .mode-panel {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1.2rem 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid #eef2f8;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+            margin-top: 0.8rem;
+        }
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .input-field label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        .input-field input, .input-field select {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.6rem;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.85rem;
+            width: 120px;
+        }
+        .action-btn {
+            background: #27ae60;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+        }
+        .action-btn-secondary {
+            background: #3b82f6;
+        }
+        .helper-text {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 0.6rem;
+        }
+
+        /* 页面预览 */
+        .preview-section {
+            margin-top: 1.5rem;
+        }
+        .thumb-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            max-height: 260px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: #f9fbfe;
+            border-radius: 1rem;
+        }
+        .thumb-item {
+            width: 70px;
+            text-align: center;
+            padding: 0.3rem;
+            border: 2px solid transparent;
+            border-radius: 0.6rem;
+            cursor: pointer;
+            background: white;
+            transition: all 0.1s;
+        }
+        .thumb-item.selected {
+            border-color: #27ae60;
+            background: #e6f7ec;
+        }
+        .page-badge {
+            background: #3b82f6;
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        /* 进度区域 */
+        .progress-area {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1.8rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .progress-bar-bg {
+            width: 80%;
+            margin: 1rem auto;
+            background: #e2e8f0;
+            border-radius: 20px;
+            overflow: hidden;
+            height: 8px;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 8px;
+            background: #27ae60;
+            transition: width 0.2s;
+        }
+
+        /* 结果区域 */
+        .result-card {
+            background: #e6f7ec;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .result-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .split-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+            max-height: 320px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+        .split-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.8rem;
+            padding: 0.7rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        /* FAQ */
+        .faq-container {
+            margin-top: 2rem;
+            background: #f9fbfe;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            border: 1px solid #edf2f7;
+        }
+        .faq-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+        .faq-item {
+            margin-bottom: 1rem;
+            padding-bottom: 0.7rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+        .faq-item h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        .faq-item p {
+            font-size: 0.8rem;
+            color: #475569;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 1.5rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #ecf3f9;
+        }
+        button {
+            font-family: inherit;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+<div class="pdf-splitter-container">
+    <h2>✂️ PDF分割工具 · 本地拆分</h2>
+    <div class="sub-desc">
+        5种分割模式 · 不上传服务器 · 完全本地处理
+    </div>
+
+    <!-- 上传区域 -->
+    <div id="uploadZone" class="upload-zone">
+        <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 21h14" stroke="currentColor"/>
+                <rect x="4" y="14" width="16" height="4" rx="1" stroke="currentColor"/>
+            </svg>
+        </div>
+        <p>点击或拖拽 PDF 文件至此</p>
+        <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
+        <div class="file-hint">最大200MB · 最多1000页 · 隐私优先</div>
+    </div>
+
+    <!-- PDF信息栏 -->
+    <div id="pdfInfoBar" style="display: none;">
+        <div class="info-card">
+            <div>
+                <strong>📄 文件：</strong> <span id="pdfFileName">-</span><br>
+                <span style="font-size:0.8rem;">总页数：<strong id="totalPagesSpan">0</strong> 页</span>
+            </div>
+            <button id="clearPdfBtn" class="clear-pdf-btn">🗑️ 清空PDF</button>
+        </div>
+    </div>
+
+    <!-- 模式选择 -->
+    <div id="modeSection" style="display: none;">
+        <div class="mode-grid">
+            <button class="mode-btn" data-mode="range">📄 提取页面范围</button>
+            <button class="mode-btn" data-mode="single">🔢 提取单页</button>
+            <button class="mode-btn" data-mode="every-n">📑 按N页拆分</button>
+            <button class="mode-btn" data-mode="custom">✏️ 自定义页面</button>
+            <button class="mode-btn" data-mode="odd-even">🔄 奇偶页拆分</button>
+        </div>
+    </div>
+
+    <!-- 各模式面板 -->
+    <div id="rangeMode" class="mode-panel" style="display: none;">
+        <h4 style="margin-bottom: 0.5rem;">📄 提取页面范围</h4>
+        <div class="input-group">
+            <div class="input-field"><label>起始页</label><input type="number" id="startPage" min="1" value="1"></div>
+            <div class="input-field"><label>结束页</label><input type="number" id="endPage" min="1" value="1"></div>
+            <button id="extractRangeBtn" class="action-btn">提取为单个PDF</button>
+        </div>
+        <div class="helper-text">示例：提取 5-10 页，将生成包含第5~10页的新PDF</div>
+    </div>
+
+    <div id="singleMode" class="mode-panel" style="display: none;">
+        <h4>🔢 提取单页</h4>
+        <div class="input-group">
+            <div class="input-field"><label>页码</label><input type="number" id="singlePageNum" min="1" value="1"></div>
+            <button id="extractSingleBtn" class="action-btn">提取为PDF</button>
+        </div>
+    </div>
+
+    <div id="everyNMode" class="mode-panel" style="display: none;">
+        <h4>📑 按N页拆分（每个文档N页）</h4>
+        <div class="input-group">
+            <div class="input-field"><label>每个文档页数</label><input type="number" id="pagesPerDoc" min="1" value="5"></div>
+            <button id="splitEveryNBtn" class="action-btn action-btn-secondary">拆分为多个PDF</button>
+        </div>
+        <div class="helper-text">例：每5页一份 → 1-5, 6-10, 11-15…</div>
+    </div>
+
+    <div id="customMode" class="mode-panel" style="display: none;">
+        <h4>✏️ 自定义页面选择</h4>
+        <div class="input-field" style="width:100%">
+            <label>输入页码（支持 1,3,5-10,12）</label>
+            <input type="text" id="customPagesInput" placeholder="例: 1,3,5,7-10,15" style="width:100%">
+        </div>
+        <div class="input-group" style="margin-top: 0.8rem;">
+            <button id="extractCustomBtn" class="action-btn">提取选中页为一个PDF</button>
+            <button id="splitCustomBtn" class="action-btn action-btn-secondary">拆分为多个PDF（每页/每组）</button>
+        </div>
+        <div class="helper-text">💡 提示：点击下方页面缩略图可快速添加页码</div>
+    </div>
+
+    <div id="oddEvenMode" class="mode-panel" style="display: none;">
+        <h4>🔄 奇偶页拆分</h4>
+        <div class="input-group">
+            <button id="extractOddBtn" class="action-btn">提取奇数页 (1,3,5...)</button>
+            <button id="extractEvenBtn" class="action-btn">提取偶数页 (2,4,6...)</button>
+            <button id="splitOddEvenBtn" class="action-btn action-btn-secondary">拆分为两个PDF (奇/偶)</button>
+        </div>
+    </div>
+
+    <!-- 页面预览缩略图 -->
+    <div id="previewSection" class="preview-section" style="display: none;">
+        <h4 style="margin-bottom: 0.5rem;">📑 页面预览（点击选择，用于自定义模式）</h4>
+        <div id="thumbnailsGrid" class="thumb-grid"></div>
+    </div>
+
+    <!-- 进度区域 -->
+    <div id="progressArea" style="display: none;">
+        <div class="progress-area">
+            <div class="spinner"></div>
+            <p id="progressMsg">处理中...</p>
+            <div class="progress-bar-bg"><div id="progressFill" class="progress-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- 结果区域 -->
+    <div id="resultArea" style="display: none;">
+        <div id="singleResultArea" style="display: none;">
+            <div class="result-card">
+                <div style="font-size: 3rem;">✅</div>
+                <h3>提取完成！</h3>
+                <p id="singleResultInfo"></p>
+                <button id="downloadSingleResult" class="action-btn">📥 下载PDF</button>
+                <button id="resetAfterSingle" class="action-btn action-btn-secondary" style="background:#6c757d;">🔄 处理其他PDF</button>
+            </div>
+        </div>
+        <div id="multiResultArea" style="display: none;">
+            <div class="result-card" style="background:#f1f5f9;">
+                <h3>📦 拆分结果</h3>
+                <div id="splitResultsList" class="split-list"></div>
+                <div class="result-buttons">
+                    <button id="downloadAllZipBtn" class="action-btn">📦 全部打包ZIP</button>
+                    <button id="resetAfterMulti" class="action-btn action-btn-secondary" style="background:#6c757d;">🔄 拆分其他PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-container">
+        <div class="faq-title">❓ 常见问题</div>
+        <div class="faq-item"><h3>🔒 PDF会上传到服务器吗？</h3><p>不会，本工具100%本地运行，使用pdf-lib在浏览器中处理，文件绝不离开您的设备。</p></div>
+        <div class="faq-item"><h3>📄 支持多大文件？</h3><p>最大200MB，建议页数不超过1000页以获得流畅体验。</p></div>
+        <div class="faq-item"><h3>🔼 可以调整页面顺序再拆分吗？</h3><p>当前版本按照原始页面顺序处理，自定义模式可选择任意页面组合。</p></div>
+        <div class="faq-item"><h3>📱 手机能用吗？</h3><p>支持移动端，但超大文件建议使用电脑浏览器。</p></div>
+    </div>
+    <footer>🔒 本地分割 · 无上传 · 用完即焚</footer>
+</div>
+
+<script>
+    (function() {
+        // ----- 全局变量 -----
+        let currentPdfBytes = null;
+        let currentPdfDoc = null;
+        let totalPages = 0;
+        let currentFileName = "document";
+        let lastSingleBytes = null;
+        let lastSingleName = "";
+        let splitItems = [];   // { name, bytes, pageDesc }
+
+        // DOM 元素
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('pdfFileInput');
+        const pdfInfoBar = document.getElementById('pdfInfoBar');
+        const modeSection = document.getElementById('modeSection');
+        const previewSection = document.getElementById('previewSection');
+        const thumbGrid = document.getElementById('thumbnailsGrid');
+        const progressArea = document.getElementById('progressArea');
+        const resultAreaDiv = document.getElementById('resultArea');
+        const singleResultArea = document.getElementById('singleResultArea');
+        const multiResultArea = document.getElementById('multiResultArea');
+        const progressMsg = document.getElementById('progressMsg');
+        const progressFill = document.getElementById('progressFill');
+
+        const fileNameSpan = document.getElementById('pdfFileName');
+        const totalPagesSpan = document.getElementById('totalPagesSpan');
+        const clearPdfBtn = document.getElementById('clearPdfBtn');
+
+        // 模式面板
+        const rangeModeDiv = document.getElementById('rangeMode');
+        const singleModeDiv = document.getElementById('singleMode');
+        const everyNModeDiv = document.getElementById('everyNMode');
+        const customModeDiv = document.getElementById('customMode');
+        const oddEvenModeDiv = document.getElementById('oddEvenMode');
+        const allPanels = [rangeModeDiv, singleModeDiv, everyNModeDiv, customModeDiv, oddEvenModeDiv];
+
+        // 辅助函数
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 KB';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showProgress(show, text = '处理中...') {
+            if (show) {
+                progressArea.style.display = 'block';
+                progressMsg.innerText = text;
+                progressFill.style.width = '0%';
+                resultAreaDiv.style.display = 'none';
+            } else {
+                progressArea.style.display = 'none';
+            }
+        }
+
+        function updateProgress(percent, msg) {
+            progressFill.style.width = `${percent}%`;
+            if (msg) progressMsg.innerText = msg;
+        }
+
+        // 加载PDF
+        async function loadPdf(file) {
+            if (!file || file.type !== 'application/pdf') {
+                alert('请选择有效的PDF文件');
+                return;
+            }
+            if (file.size > 200 * 1024 * 1024) {
+                alert('文件超过200MB限制');
+                return;
+            }
+            showProgress(true, '正在解析PDF...');
+            try {
+                const buffer = await file.arrayBuffer();
+                const pdfDoc = await PDFLib.PDFDocument.load(buffer);
+                totalPages = pdfDoc.getPageCount();
+                if (totalPages > 1000) {
+                    alert('页数超过1000，可能导致性能问题，建议使用较小文件');
+                }
+                currentPdfBytes = buffer;
+                currentPdfDoc = pdfDoc;
+                currentFileName = file.name.replace(/\.pdf$/i, '');
+                fileNameSpan.innerText = file.name;
+                totalPagesSpan.innerText = totalPages;
+                pdfInfoBar.style.display = 'block';
+                modeSection.style.display = 'block';
+                previewSection.style.display = 'block';
+                resultAreaDiv.style.display = 'none';
+                // 设置范围默认值
+                document.getElementById('startPage').value = 1;
+                document.getElementById('endPage').value = totalPages;
+                document.getElementById('singlePageNum').value = 1;
+                document.getElementById('pagesPerDoc').value = 5;
+                // 生成缩略图（简易数字版）
+                generateThumbnails();
+                // 默认激活范围模式
+                activateMode('range');
+                showProgress(false);
+            } catch (err) {
+                console.error(err);
+                alert('PDF加载失败，文件可能损坏或加密');
+                showProgress(false);
+            }
+        }
+
+        function generateThumbnails() {
+            thumbGrid.innerHTML = '';
+            const maxShow = Math.min(totalPages, 80);
+            for (let i = 1; i <= maxShow; i++) {
+                const thumb = document.createElement('div');
+                thumb.className = 'thumb-item';
+                thumb.setAttribute('data-page', i);
+                thumb.innerHTML = `<div class="page-badge">${i}</div><div style="font-size:10px;">第${i}页</div>`;
+                thumb.onclick = (e) => {
+                    e.stopPropagation();
+                    const input = document.getElementById('customPagesInput');
+                    if (input) {
+                        let val = input.value.trim();
+                        const pageStr = i.toString();
+                        const pagesSet = new Set();
+                        if (val) {
+                            val.split(',').forEach(p => {
+                                p = p.trim();
+                                if (p.includes('-')) {
+                                    let [a,b] = p.split('-');
+                                    let start = parseInt(a), end = parseInt(b);
+                                    for (let x = start; x <= end; x++) pagesSet.add(x);
+                                } else if (!isNaN(parseInt(p))) pagesSet.add(parseInt(p));
+                            });
+                        }
+                        if (pagesSet.has(i)) pagesSet.delete(i);
+                        else pagesSet.add(i);
+                        const sorted = Array.from(pagesSet).sort((a,b)=>a-b);
+                        let result = [];
+                        let start = sorted[0];
+                        let end = sorted[0];
+                        for (let k=1;k<=sorted.length;k++) {
+                            if (k === sorted.length || sorted[k] !== end+1) {
+                                if (start === end) result.push(`${start}`);
+                                else result.push(`${start}-${end}`);
+                                if (k < sorted.length) { start = sorted[k]; end = sorted[k]; }
+                            } else { end = sorted[k]; }
+                        }
+                        input.value = result.join(',');
+                        highlightSelectedThumbs(input.value);
+                    }
+                };
+                thumbGrid.appendChild(thumb);
+            }
+            if (totalPages > maxShow) {
+                let more = document.createElement('div');
+                more.className = 'thumb-item';
+                more.innerHTML = `<div style="font-size:10px;">+${totalPages-maxShow}页</div>`;
+                thumbGrid.appendChild(more);
+            }
+        }
+
+        function highlightSelectedThumbs(value) {
+            if (!value) return;
+            const selectedSet = new Set();
+            value.split(',').forEach(part => {
+                part = part.trim();
+                if (part.includes('-')) {
+                    let [s,e] = part.split('-');
+                    for (let i=parseInt(s); i<=parseInt(e); i++) selectedSet.add(i);
+                } else if (!isNaN(parseInt(part))) selectedSet.add(parseInt(part));
+            });
+            document.querySelectorAll('.thumb-item').forEach(el => {
+                let pg = parseInt(el.getAttribute('data-page'));
+                if (!isNaN(pg) && selectedSet.has(pg)) el.classList.add('selected');
+                else el.classList.remove('selected');
+            });
+        }
+
+        // 模式激活
+        function activateMode(mode) {
+            allPanels.forEach(p => { if (p) p.style.display = 'none'; });
+            if (mode === 'range') rangeModeDiv.style.display = 'block';
+            if (mode === 'single') singleModeDiv.style.display = 'block';
+            if (mode === 'every-n') everyNModeDiv.style.display = 'block';
+            if (mode === 'custom') customModeDiv.style.display = 'block';
+            if (mode === 'odd-even') oddEvenModeDiv.style.display = 'block';
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                if (btn.dataset.mode === mode) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        // 核心：从 ranges 创建新PDF bytes
+        async function createPdfFromRanges(ranges) {
+            const newDoc = await PDFLib.PDFDocument.create();
+            for (const range of ranges) {
+                for (let i = range.start; i <= range.end; i++) {
+                    const idx = i - 1;
+                    const [copied] = await newDoc.copyPages(currentPdfDoc, [idx]);
+                    newDoc.addPage(copied);
+                }
+            }
+            return await newDoc.save();
+        }
+
+        // 单个提取
+        async function extractSingle(ranges, baseName) {
+            if (!currentPdfDoc) return;
+            showProgress(true, '正在提取页面...');
+            try {
+                updateProgress(20, '生成PDF中...');
+                const bytes = await createPdfFromRanges(ranges);
+                const pageCount = ranges.reduce((sum, r) => sum + (r.end - r.start + 1), 0);
+                lastSingleBytes = bytes;
+                lastSingleName = `${baseName}.pdf`;
+                updateProgress(100, '完成');
+                singleResultArea.style.display = 'block';
+                multiResultArea.style.display = 'none';
+                document.getElementById('singleResultInfo').innerHTML = `成功提取 ${pageCount} 页<br>文件大小: ${formatFileSize(bytes.length)}`;
+                resultAreaDiv.style.display = 'block';
+                showProgress(false);
+            } catch(e) {
+                console.error(e);
+                alert('提取失败：' + e.message);
+                showProgress(false);
+            }
+        }
+
+        async function splitMultiple(ranges, namePrefix) {
+            if (!currentPdfDoc) return;
+            showProgress(true, '正在拆分...');
+            splitItems = [];
+            try {
+                for (let i=0; i<ranges.length; i++) {
+                    const range = ranges[i];
+                    updateProgress((i/ranges.length)*100, `处理第 ${i+1}/${ranges.length} 个文件`);
+                    const bytes = await createPdfFromRanges([range]);
+                    const pagesCount = range.end - range.start + 1;
+                    splitItems.push({
+                        name: `${namePrefix}_part${i+1}_p${range.start}-${range.end}.pdf`,
+                        bytes: bytes,
+                        desc: `第${range.start}-${range.end}页 (${pagesCount}页)`
+                    });
+                }
+                displaySplitResults();
+                showProgress(false);
+                resultAreaDiv.style.display = 'block';
+                singleResultArea.style.display = 'none';
+                multiResultArea.style.display = 'block';
+            } catch(e) {
+                alert('拆分出错：' + e.message);
+                showProgress(false);
+            }
+        }
+
+        function displaySplitResults() {
+            const container = document.getElementById('splitResultsList');
+            container.innerHTML = '';
+            splitItems.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'split-item';
+                div.innerHTML = `
+                    <div><strong>${escapeHtml(item.name)}</strong><br><span style="font-size:0.7rem;">${item.desc} · ${formatFileSize(item.bytes.length)}</span></div>
+                    <button class="action-btn" data-split-idx="${idx}" style="background:#3b82f6; padding:0.3rem 1rem;">下载</button>
+                `;
+                container.appendChild(div);
+            });
+            document.querySelectorAll('[data-split-idx]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(btn.dataset.splitIdx);
+                    const item = splitItems[idx];
+                    if (item) downloadBlob(item.bytes, item.name);
+                });
+            });
+        }
+
+        function downloadBlob(bytes, filename) {
+            const blob = new Blob([bytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+        // 重置全部
+        function resetAll() {
+            currentPdfBytes = null;
+            currentPdfDoc = null;
+            totalPages = 0;
+            splitItems = [];
+            lastSingleBytes = null;
+            pdfInfoBar.style.display = 'none';
+            modeSection.style.display = 'none';
+            previewSection.style.display = 'none';
+            resultAreaDiv.style.display = 'none';
+            showProgress(false);
+            fileInput.value = '';
+        }
+
+        // 事件绑定
+        uploadZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => { if(e.target.files[0]) loadPdf(e.target.files[0]); });
+        uploadZone.addEventListener('dragover', (e) => e.preventDefault());
+        uploadZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if(file && file.type === 'application/pdf') loadPdf(file);
+            else alert('请拖入PDF文件');
+        });
+
+        clearPdfBtn.addEventListener('click', resetAll);
+
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => activateMode(btn.dataset.mode));
+        });
+
+        // 范围提取
+        document.getElementById('extractRangeBtn').addEventListener('click', async () => {
+            let start = parseInt(document.getElementById('startPage').value);
+            let end = parseInt(document.getElementById('endPage').value);
+            if (isNaN(start) || isNaN(end) || start<1 || end>totalPages || start>end) {
+                alert(`请输入有效范围 (1-${totalPages})`);
+                return;
+            }
+            await extractSingle([{start, end}], `${currentFileName}_p${start}-${end}`);
+        });
+
+        // 单页提取
+        document.getElementById('extractSingleBtn').addEventListener('click', async () => {
+            let p = parseInt(document.getElementById('singlePageNum').value);
+            if (isNaN(p) || p<1 || p>totalPages) { alert(`请输入1-${totalPages}之间的页码`); return; }
+            await extractSingle([{start:p, end:p}], `${currentFileName}_page${p}`);
+        });
+
+        // 每N页拆分
+        document.getElementById('splitEveryNBtn').addEventListener('click', async () => {
+            let n = parseInt(document.getElementById('pagesPerDoc').value);
+            if (isNaN(n) || n<1) { alert('请输入每份文档页数'); return; }
+            let ranges = [];
+            for (let i=1; i<=totalPages; i+=n) {
+                let end = Math.min(i+n-1, totalPages);
+                ranges.push({start:i, end});
+            }
+            await splitMultiple(ranges, `${currentFileName}_每${n}页`);
+        });
+
+        // 自定义提取/拆分
+        document.getElementById('extractCustomBtn').addEventListener('click', async () => {
+            let raw = document.getElementById('customPagesInput').value;
+            if (!raw.trim()) { alert('请输入页码'); return; }
+            try {
+                let pages = parseCustomPages(raw, totalPages);
+                if (!pages.length) throw new Error();
+                let ranges = mergeToRanges(pages);
+                await extractSingle(ranges, `${currentFileName}_custom`);
+            } catch(e) { alert('页码格式错误，如 1,3,5-10'); }
+        });
+        document.getElementById('splitCustomBtn').addEventListener('click', async () => {
+            let raw = document.getElementById('customPagesInput').value;
+            if (!raw.trim()) { alert('请输入页码'); return; }
+            try {
+                let pages = parseCustomPages(raw, totalPages);
+                if (!pages.length) throw new Error();
+                let ranges = mergeToRanges(pages);
+                await splitMultiple(ranges, `${currentFileName}_custom_split`);
+            } catch(e) { alert('页码格式错误'); }
+        });
+
+        function parseCustomPages(input, max) {
+            let set = new Set();
+            input.split(',').forEach(part => {
+                part = part.trim();
+                if (part.includes('-')) {
+                    let [s,e] = part.split('-');
+                    let start = parseInt(s), end = parseInt(e);
+                    for (let i=start; i<=end && i<=max; i++) if(i>=1) set.add(i);
+                } else {
+                    let p = parseInt(part);
+                    if (!isNaN(p) && p>=1 && p<=max) set.add(p);
+                }
+            });
+            return Array.from(set).sort((a,b)=>a-b);
+        }
+        function mergeToRanges(pages) {
+            let ranges = [];
+            let start = pages[0], end = pages[0];
+            for (let i=1;i<=pages.length;i++) {
+                if (i===pages.length || pages[i] !== end+1) {
+                    ranges.push({start, end});
+                    if (i<pages.length) { start = pages[i]; end = pages[i]; }
+                } else { end = pages[i]; }
+            }
+            return ranges;
+        }
+
+        // 奇偶功能
+        document.getElementById('extractOddBtn').addEventListener('click', async () => {
+            let ranges = [];
+            for (let i=1; i<=totalPages; i+=2) ranges.push({start:i, end:i});
+            await extractSingle(ranges, `${currentFileName}_odd`);
+        });
+        document.getElementById('extractEvenBtn').addEventListener('click', async () => {
+            let ranges = [];
+            for (let i=2; i<=totalPages; i+=2) ranges.push({start:i, end:i});
+            await extractSingle(ranges, `${currentFileName}_even`);
+        });
+        document.getElementById('splitOddEvenBtn').addEventListener('click', async () => {
+            let oddRanges=[], evenRanges=[];
+            for (let i=1; i<=totalPages; i++) {
+                if (i%2===1) oddRanges.push({start:i, end:i});
+                else evenRanges.push({start:i, end:i});
+            }
+            splitItems = [];
+            if (oddRanges.length) {
+                let bytes = await createPdfFromRanges(oddRanges);
+                splitItems.push({name:`${currentFileName}_odd.pdf`, bytes, desc:`奇数页 (${oddRanges.length}页)`});
+            }
+            if (evenRanges.length) {
+                let bytes = await createPdfFromRanges(evenRanges);
+                splitItems.push({name:`${currentFileName}_even.pdf`, bytes, desc:`偶数页 (${evenRanges.length}页)`});
+            }
+            displaySplitResults();
+            resultAreaDiv.style.display = 'block';
+            singleResultArea.style.display = 'none';
+            multiResultArea.style.display = 'block';
+            showProgress(false);
+        });
+
+        document.getElementById('downloadSingleResult').addEventListener('click', () => {
+            if (lastSingleBytes) downloadBlob(lastSingleBytes, lastSingleName);
+        });
+        document.getElementById('resetAfterSingle').addEventListener('click', resetAll);
+        document.getElementById('resetAfterMulti').addEventListener('click', resetAll);
+        document.getElementById('downloadAllZipBtn').addEventListener('click', async () => {
+            if (!splitItems.length) return;
+            const zip = new JSZip();
+            const folder = zip.folder("split_pdfs");
+            splitItems.forEach(item => { folder.file(item.name, item.bytes); });
+            const content = await zip.generateAsync({ type: 'blob' });
+            downloadBlob(content, `${currentFileName}_split_all.zip`);
+        });
+
+        document.getElementById('customPagesInput').addEventListener('input', (e) => {
+            highlightSelectedThumbs(e.target.value);
+        });
+    })();
+</script>
+</body>
+</html>

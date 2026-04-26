@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Local Image Previewer - Browse & Export Images | 100% Local</title>
+    <meta name="description" content="Browse images from local folders including HEIC, LIVP, WebP, JPG, PNG. Select multiple images and export as ZIP. 100% local, no upload.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: #f5f5f5;
+            border-radius: 16px;
+            padding: 24px 30px;
+            margin-bottom: 24px;
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Folder Selector */
+        .folder-selector {
+            background: #f8f9fa;
+            border: 2px dashed #ccc;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .folder-selector:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .folder-selector svg {
+            width: 48px;
+            height: 48px;
+            stroke: #666;
+            margin-bottom: 12px;
+            fill: none;
+        }
+
+        .folder-selector p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .folder-input {
+            display: none;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stats-left {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .stat-value {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .btn-clear, .btn-export {
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-clear {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #c0392b;
+        }
+
+        .btn-export {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #219a52;
+        }
+
+        .btn-export:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Selection Toolbar */
+        .selection-bar {
+            background: #e8f4fd;
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border: 1px solid #3498db;
+        }
+
+        .selection-info {
+            color: #3498db;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .selection-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-select-all, .btn-deselect-all {
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            border: 1px solid #3498db;
+            background: white;
+            color: #3498db;
+        }
+
+        .btn-select-all:hover, .btn-deselect-all:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            min-height: 200px;
+        }
+
+        .image-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .image-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-card.selected {
+            border: 2px solid #27ae60;
+            background: #e8f5e9;
+        }
+
+        .checkbox-overlay {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.2s;
+        }
+
+        .image-card.selected .checkbox-overlay {
+            background: #27ae60;
+            border-color: #27ae60;
+        }
+
+        .checkbox-overlay::after {
+            content: "✓";
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .image-card.selected .checkbox-overlay::after {
+            display: block;
+        }
+
+        .image-preview {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            background: #fafafa;
+            display: block;
+        }
+
+        .image-info {
+            padding: 10px;
+            font-size: 11px;
+            color: #666;
+            background: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .image-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .image-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        /* Loading States */
+        .loading-area, .empty-area {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+            background: #fafafa;
+            border-radius: 16px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e0e0e0;
+            border-top-color: #3498db;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scroll Loader */
+        .scroll-trigger {
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .scroll-loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        .scroll-loader .spinner-small {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e0e0e0;
+            border-top-color: #3498db;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .modal-info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #ccc;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            margin-top: 50px;
+            padding: 30px 20px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .faq-section h3 {
+            text-align: center;
+            font-size: 24px;
+            color: #1a1a2e;
+            margin-bottom: 30px;
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .faq-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .faq-item h4::before {
+            content: "❓";
+            font-size: 16px;
+            color: #3498db;
+        }
+
+        .faq-item p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+            margin-left: 26px;
+        }
+
+        .highlight {
+            color: #3498db;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            h1 { font-size: 22px; }
+            .image-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+            .stats-bar { flex-direction: column; align-items: flex-start; }
+            .selection-bar { flex-direction: column; align-items: flex-start; }
+            .faq-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>
+            📸 Local Image Previewer
+            <span class="badge">100% Local</span>
+        </h1>
+        <p class="subtitle">Browse images from local folders (including subfolders). Select multiple images and export as ZIP. Supports HEIC, LIVP, JPG, PNG, GIF, WebP, BMP.</p>
+    </div>
+
+    <!-- Folder Selector with Folder Icon -->
+    <div class="folder-selector" id="folder-selector">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p>Click to select a folder containing images</p>
+        <p style="font-size: 12px; margin-top: 8px;">Supports subfolders | HEIC, LIVP, JPG, PNG, GIF, BMP, WebP, SVG</p>
+        <input type="file" id="folder-input" class="folder-input" webkitdirectory directory multiple>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar" id="stats-bar" style="display: none;">
+        <div class="stats-left">
+            <div class="stat-item">📁 <span id="folder-name">-</span></div>
+            <div class="stat-item">🖼️ Total: <span id="total-count" class="stat-value">0</span></div>
+            <div class="stat-item">👁️ Loaded: <span id="loaded-count" class="stat-value">0</span></div>
+            <div class="stat-item">📏 Size: <span id="total-size" class="stat-value">0</span></div>
+        </div>
+        <div class="stats-right">
+            <button class="btn-clear" id="clear-btn">🗑️ Clear All</button>
+        </div>
+    </div>
+
+    <!-- Selection Toolbar -->
+    <div class="selection-bar" id="selection-bar" style="display: none;">
+        <div class="selection-info">
+            ✅ <span id="selected-count">0</span> image(s) selected
+        </div>
+        <div class="selection-actions">
+            <button class="btn-select-all" id="select-all-btn">Select All</button>
+            <button class="btn-deselect-all" id="deselect-all-btn">Deselect All</button>
+            <button class="btn-export" id="export-btn">📦 Export Selected as ZIP</button>
+        </div>
+    </div>
+
+    <!-- Image Grid -->
+    <div id="image-grid" class="image-grid">
+        <div class="empty-area">
+            📁 Select a folder to start previewing images
+        </div>
+    </div>
+
+    <!-- Scroll Trigger -->
+    <div class="scroll-trigger" id="scroll-trigger">
+        <div class="scroll-loader" id="scroll-loader">
+            <div class="spinner-small"></div>
+            <div>Loading more images...</div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <img id="modal-img" alt="">
+        <div class="modal-info" id="modal-info"></div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section">
+        <h3>❓ Frequently Asked Questions</h3>
+        <div class="faq-grid">
+            <div class="faq-item">
+                <h4>What image formats are supported?</h4>
+                <p>Supports <span class="highlight">HEIC, LIVP, JPG, PNG, GIF, BMP, WebP, and SVG</span>. HEIC and LIVP (Apple Live Photos) are automatically converted to JPG for preview.</p>
+            </div>
+            <div class="faq-item">
+                <h4>Are my images uploaded to a server?</h4>
+                <p>No, absolutely not. This tool works <span class="highlight">100% locally in your browser</span>. Your images never leave your device, ensuring complete privacy.</p>
+            </div>
+            <div class="faq-item">
+                <h4>Can I browse subfolders?</h4>
+                <p>Yes! When you select a folder, the tool automatically scans <span class="highlight">all subfolders</span> recursively and displays images from all nested directories.</p>
+            </div>
+            <div class="faq-item">
+                <h4>How does lazy loading work?</h4>
+                <p>Images are loaded in batches of 30. As you scroll down, more images are automatically loaded. This prevents memory issues when browsing folders with thousands of images.</p>
+            </div>
+            <div class="faq-item">
+                <h4>What happens to Live Photos (LIVP)?</h4>
+                <p>LIVP files contain a still image and a video. This tool extracts the <span class="highlight">still image</span> and converts it to JPG for preview and export. The video component is not preserved.</p>
+            </div>
+            <div class="faq-item">
+                <h4>How do I export selected images?</h4>
+                <p>Click the checkbox on any image to select it, then click <span class="highlight">"Export Selected as ZIP"</span>. All selected images will be packaged into a ZIP file for download.</p>
+            </div>
+            <div class="faq-item">
+                <h4>Why do some images fail to load?</h4>
+                <p>Some HEIC/LIVP files may be corrupted or use unsupported compression. In such cases, the tool shows a "Preview failed" message. The original files remain unaffected.</p>
+            </div>
+            <div class="faq-item">
+                <h4>Is there a file size limit?</h4>
+                <p>Individual files up to <span class="highlight">50MB</span> are supported. Very large files may take longer to process but will still work locally in your browser.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+    // ==================== 全局变量 ====================
+    let allImageFiles = [];
+    let loadedItems = [];
+    let currentOffset = 0;
+    const BATCH_SIZE = 30;
+    let isLoading = false;
+    let hasMore = true;
+    let currentFolderName = '';
+    let totalSize = 0;
+    
+    let imageCache = new Map();
+    let selectedIds = new Set();
+    
+    // DOM 元素
+    const folderSelector = document.getElementById('folder-selector');
+    const folderInput = document.getElementById('folder-input');
+    const statsBar = document.getElementById('stats-bar');
+    const selectionBar = document.getElementById('selection-bar');
+    const imageGrid = document.getElementById('image-grid');
+    const folderNameSpan = document.getElementById('folder-name');
+    const totalCountSpan = document.getElementById('total-count');
+    const loadedCountSpan = document.getElementById('loaded-count');
+    const totalSizeSpan = document.getElementById('total-size');
+    const selectedCountSpan = document.getElementById('selected-count');
+    const clearBtn = document.getElementById('clear-btn');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const deselectAllBtn = document.getElementById('deselect-all-btn');
+    const exportBtn = document.getElementById('export-btn');
+    const scrollTrigger = document.getElementById('scroll-trigger');
+    const scrollLoader = document.getElementById('scroll-loader');
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modal-img');
+    const modalInfo = document.getElementById('modal-info');
+    
+    // ==================== 工具函数 ====================
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+    
+    function formatFileSizeShort(bytes) {
+        if (bytes === 0) return '0B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + sizes[i];
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function getFileExtension(filename) {
+        return filename.split('.').pop().toLowerCase();
+    }
+    
+    function isSupportedImage(filename) {
+        const ext = getFileExtension(filename);
+        const supported = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'heic', 'heif', 'livp'];
+        return supported.includes(ext);
+    }
+    
+    // ==================== HEIC/LIVP 转换 ====================
+    async function extractHEICFromLIVP(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const arrayBuffer = e.target.result;
+                    const zip = await JSZip.loadAsync(arrayBuffer);
+                    let heicFile = null;
+                    for (const [filename, zipEntry] of Object.entries(zip.files)) {
+                        if (filename.toLowerCase().endsWith('.heic')) {
+                            heicFile = zipEntry;
+                            break;
+                        }
+                    }
+                    if (!heicFile) {
+                        reject(new Error('No HEIC file found in LIVP'));
+                        return;
+                    }
+                    const heicBlob = await heicFile.async('blob');
+                    resolve(heicBlob);
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            reader.onerror = () => reject(new Error('Failed to read LIVP file'));
+            reader.readAsArrayBuffer(file);
+        });
+    }
+    
+    async function convertHEICToJPG(heicBlob, quality = 0.85) {
+        return new Promise((resolve, reject) => {
+            heic2any({
+                blob: heicBlob,
+                toType: 'image/jpeg',
+                quality: quality
+            }).then(result => {
+                let jpgBlob = result;
+                if (Array.isArray(result) && result.length > 0) {
+                    jpgBlob = result[0];
+                }
+                resolve(jpgBlob);
+            }).catch(reject);
+        });
+    }
+    
+    async function getImagePreviewUrl(file, filename) {
+        const ext = getFileExtension(filename);
+        
+        if (ext === 'livp') {
+            const heicBlob = await extractHEICFromLIVP(file);
+            const jpgBlob = await convertHEICToJPG(heicBlob, 0.85);
+            return URL.createObjectURL(jpgBlob);
+        } else if (ext === 'heic' || ext === 'heif') {
+            const jpgBlob = await convertHEICToJPG(file, 0.85);
+            return URL.createObjectURL(jpgBlob);
+        } else {
+            return URL.createObjectURL(file);
+        }
+    }
+    
+    async function getOriginalBlobForExport(file, filename) {
+        const ext = getFileExtension(filename);
+        
+        if (ext === 'livp') {
+            const heicBlob = await extractHEICFromLIVP(file);
+            const jpgBlob = await convertHEICToJPG(heicBlob, 0.9);
+            return { blob: jpgBlob, ext: 'jpg' };
+        } else if (ext === 'heic' || ext === 'heif') {
+            const jpgBlob = await convertHEICToJPG(file, 0.9);
+            return { blob: jpgBlob, ext: 'jpg' };
+        } else {
+            const originalExt = ext === 'jpeg' ? 'jpg' : ext;
+            return { blob: file, ext: originalExt };
+        }
+    }
+    
+    // ==================== 加载文件夹 ====================
+    async function loadFolder(files) {
+        clearAllInternal();
+        
+        if (files.length > 0) {
+            const firstFile = files[0];
+            const pathParts = firstFile.webkitRelativePath.split('/');
+            currentFolderName = pathParts[0] || 'Selected Folder';
+            folderNameSpan.textContent = currentFolderName;
+        }
+        
+        const imageFiles = [];
+        for (const file of files) {
+            if (isSupportedImage(file.name)) {
+                const relativePath = file.webkitRelativePath;
+                imageFiles.push({
+                    file: file,
+                    path: relativePath,
+                    name: file.name,
+                    ext: getFileExtension(file.name),
+                    size: file.size,
+                    subPath: relativePath.substring(0, relativePath.lastIndexOf('/')) || 'root'
+                });
+                totalSize += file.size;
+            }
+        }
+        
+        imageFiles.sort((a, b) => a.path.localeCompare(b.path));
+        allImageFiles = imageFiles;
+        
+        totalCountSpan.textContent = allImageFiles.length;
+        totalSizeSpan.textContent = formatFileSize(totalSize);
+        statsBar.style.display = 'flex';
+        selectionBar.style.display = 'flex';
+        
+        if (allImageFiles.length === 0) {
+            imageGrid.innerHTML = '<div class="empty-area">📁 No supported images found in this folder</div>';
+            return;
+        }
+        
+        imageGrid.innerHTML = '<div class="loading-area"><div class="spinner"></div><div>Loading previews...</div></div>';
+        
+        loadMoreImages();
+        setupScrollObserver();
+    }
+    
+    function clearAllInternal() {
+        for (const [id, cache] of imageCache) {
+            if (cache.url) URL.revokeObjectURL(cache.url);
+        }
+        imageCache.clear();
+        allImageFiles = [];
+        loadedItems = [];
+        currentOffset = 0;
+        hasMore = true;
+        isLoading = false;
+        totalSize = 0;
+        selectedIds.clear();
+        updateSelectedUI();
+        imageGrid.innerHTML = '';
+    }
+    
+    function updateSelectedUI() {
+        selectedCountSpan.textContent = selectedIds.size;
+        const cards = document.querySelectorAll('.image-card');
+        cards.forEach(card => {
+            const cardId = card.getAttribute('data-id');
+            if (cardId && selectedIds.has(cardId)) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+    }
+    
+    function setupScrollObserver() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && hasMore && !isLoading && currentOffset < allImageFiles.length) {
+                    loadMoreImages();
+                }
+            });
+        }, { rootMargin: '200px' });
+        observer.observe(scrollTrigger);
+    }
+    
+    async function loadMoreImages() {
+        if (isLoading) return;
+        if (currentOffset >= allImageFiles.length) {
+            hasMore = false;
+            scrollLoader.style.display = 'none';
+            return;
+        }
+        
+        isLoading = true;
+        scrollLoader.style.display = 'block';
+        
+        const start = currentOffset;
+        const end = Math.min(currentOffset + BATCH_SIZE, allImageFiles.length);
+        const batch = allImageFiles.slice(start, end);
+        
+        for (let i = 0; i < batch.length; i++) {
+            const item = batch[i];
+            const cardId = `card_${Date.now()}_${start + i}_${Math.random()}`;
+            item.cardId = cardId;
+            
+            const card = document.createElement('div');
+            card.className = 'image-card';
+            card.setAttribute('data-id', cardId);
+            card.setAttribute('data-path', item.path);
+            card.innerHTML = `
+                <div class="checkbox-overlay"></div>
+                <div class="image-preview" style="display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
+                    <div class="spinner" style="width: 30px; height: 30px;"></div>
+                </div>
+                <div class="image-info">
+                    <div class="image-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+                    <div class="image-meta">
+                        <span>${formatFileSizeShort(item.size)}</span>
+                        <span>${item.ext.toUpperCase()}</span>
+                    </div>
+                </div>
+            `;
+            
+            card.onclick = (e) => {
+                if (e.target.closest('.checkbox-overlay')) {
+                    e.stopPropagation();
+                }
+                toggleSelect(cardId);
+            };
+            
+            imageGrid.appendChild(card);
+            loadedItems.push(cardId);
+        }
+        
+        for (let i = 0; i < batch.length; i++) {
+            const item = batch[i];
+            const card = document.querySelector(`.image-card[data-id="${item.cardId}"]`);
+            if (!card) continue;
+            
+            try {
+                const previewUrl = await getImagePreviewUrl(item.file, item.name);
+                const previewDiv = card.querySelector('.image-preview');
+                if (previewDiv) {
+                    const img = document.createElement('img');
+                    img.className = 'image-preview';
+                    img.src = previewUrl;
+                    img.alt = item.name;
+                    img.loading = 'lazy';
+                    img.onerror = () => {
+                        previewDiv.innerHTML = '<div style="text-align:center;padding:20px;">❌<br>Failed</div>';
+                    };
+                    previewDiv.parentNode.replaceChild(img, previewDiv);
+                }
+                
+                imageCache.set(item.cardId, {
+                    url: previewUrl,
+                    originalFile: item.file,
+                    originalName: item.name,
+                    originalPath: item.path,
+                    originalSize: item.size,
+                    originalExt: item.ext
+                });
+                
+                card.onclick = (e) => {
+                    if (e.target.closest('.checkbox-overlay')) {
+                        toggleSelect(item.cardId);
+                    } else {
+                        showModal(item.name, previewUrl, item.size, item.ext);
+                    }
+                };
+                
+            } catch (error) {
+                console.error(`Failed to load ${item.name}:`, error);
+                const previewDiv = card.querySelector('.image-preview');
+                if (previewDiv) {
+                    previewDiv.innerHTML = '<div style="text-align:center;padding:20px;">⚠️<br>Preview failed</div>';
+                }
+            }
+            
+            loadedCountSpan.textContent = Math.min(currentOffset + i + 1, allImageFiles.length);
+            await new Promise(r => setTimeout(r, 5));
+        }
+        
+        currentOffset = end;
+        loadedCountSpan.textContent = currentOffset;
+        isLoading = false;
+        scrollLoader.style.display = 'none';
+        
+        if (currentOffset >= allImageFiles.length) {
+            hasMore = false;
+        }
+    }
+    
+    function toggleSelect(cardId) {
+        if (selectedIds.has(cardId)) {
+            selectedIds.delete(cardId);
+        } else {
+            selectedIds.add(cardId);
+        }
+        updateSelectedUI();
+    }
+    
+    function selectAll() {
+        for (const item of loadedItems) {
+            selectedIds.add(item);
+        }
+        updateSelectedUI();
+    }
+    
+    function deselectAll() {
+        selectedIds.clear();
+        updateSelectedUI();
+    }
+    
+    async function exportSelected() {
+        if (selectedIds.size === 0) {
+            alert('Please select at least one image to export');
+            return;
+        }
+        
+        exportBtn.disabled = true;
+        exportBtn.textContent = '⏳ Packaging...';
+        
+        const zip = new JSZip();
+        const folder = zip.folder('exported_images');
+        
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (const cardId of selectedIds) {
+            const cache = imageCache.get(cardId);
+            if (cache && cache.originalFile) {
+                try {
+                    const { blob, ext } = await getOriginalBlobForExport(cache.originalFile, cache.originalName);
+                    const baseName = cache.originalName.replace(/\.[^/.]+$/, '');
+                    const filename = `${baseName}.${ext}`;
+                    folder.file(filename, blob);
+                    successCount++;
+                } catch (error) {
+                    console.error(`Export failed for ${cache.originalName}:`, error);
+                    failCount++;
+                }
+            }
+        }
+        
+        if (successCount > 0) {
+            const content = await zip.generateAsync({ type: 'blob' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(content);
+            link.href = url;
+            link.download = `${currentFolderName}_exported_${successCount}images.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        
+        if (failCount > 0) {
+            alert(`Exported ${successCount} images. Failed: ${failCount}`);
+        }
+        
+        exportBtn.disabled = false;
+        exportBtn.textContent = '📦 Export Selected as ZIP';
+    }
+    
+    function showModal(name, url, size, ext) {
+        modalImg.src = url;
+        modalInfo.innerHTML = `${escapeHtml(name)} | ${formatFileSize(size)} | ${ext.toUpperCase()}`;
+        modal.classList.add('active');
+    }
+    
+    function closeModal() {
+        modal.classList.remove('active');
+        modalImg.src = '';
+    }
+    
+    function clearAll() {
+        clearAllInternal();
+        statsBar.style.display = 'none';
+        selectionBar.style.display = 'none';
+        imageGrid.innerHTML = '<div class="empty-area">📁 Select a folder to start previewing images</div>';
+        folderInput.value = '';
+        totalCountSpan.textContent = '0';
+        loadedCountSpan.textContent = '0';
+        totalSizeSpan.textContent = '0';
+        selectedCountSpan.textContent = '0';
+    }
+    
+    // ==================== 事件绑定 ====================
+    folderSelector.addEventListener('click', () => folderInput.click());
+    
+    folderInput.addEventListener('change', async (e) => {
+        if (e.target.files.length > 0) {
+            await loadFolder(Array.from(e.target.files));
+        }
+    });
+    
+    clearBtn.addEventListener('click', clearAll);
+    selectAllBtn.addEventListener('click', selectAll);
+    deselectAllBtn.addEventListener('click', deselectAll);
+    exportBtn.addEventListener('click', exportSelected);
+    modal.addEventListener('click', closeModal);
+</script>
+</body>
+</html>

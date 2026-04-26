@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>PDF Signer - Sign PDF Documents Online | 100% Local</title>
+    <meta name="description" content="Sign PDF documents online for free. Add handwritten signature, text signature, or image signature to PDF files. Support multi-page signatures - each page can have its own signature. Drag to position. 100% local processing - no upload.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .step-section {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 24px 30px;
+            margin-bottom: 24px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .step-badge {
+            background: #3498db;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .step-badge.completed {
+            background: #27ae60;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .upload-area svg {
+            width: 48px;
+            height: 48px;
+            stroke: #666;
+        }
+
+        .pdf-preview-section {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 24px 30px;
+            margin-bottom: 24px;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .pdf-preview-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            background: #2c2c2c;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .pdf-page-canvas {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .signature-overlay {
+            position: absolute;
+            background: rgba(52, 152, 219, 0.15);
+            border: 2px dashed #3498db;
+            border-radius: 4px;
+            cursor: move;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            transition: box-shadow 0.2s;
+        }
+
+        .signature-overlay:hover {
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+        }
+
+        .drag-hint {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .page-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .page-nav button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-nav button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .page-nav span {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .page-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #27ae60;
+        }
+
+        .file-info-bar {
+            background: #e8f4fd;
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .file-info {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .file-info strong {
+            color: #3498db;
+        }
+
+        .two-columns {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .settings-panel {
+            flex: 1;
+            min-width: 320px;
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .action-panel {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: normal;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+
+        .signature-creator {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            margin-top: 10px;
+        }
+
+        .signature-canvas-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            margin-bottom: 12px;
+        }
+
+        .signature-canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: white;
+            cursor: crosshair;
+            border-radius: 8px;
+        }
+
+        .signature-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .btn-clear-sign {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-save-sign {
+            background: #27ae60;
+            color: white;
+        }
+
+        .font-selector {
+            margin-bottom: 12px;
+        }
+        .font-selector select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .text-sign-preview {
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 12px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .text-sign-preview span {
+            font-size: 48px;
+            word-break: break-word;
+        }
+
+        .image-sign-preview {
+            max-width: 200px;
+            max-height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .color-presets {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .color-preset {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-preset:hover {
+            transform: scale(1.1);
+        }
+
+        .color-preset.active {
+            border-color: #333;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider-row input {
+            flex: 1;
+        }
+
+        .slider-row span {
+            min-width: 45px;
+            color: #3498db;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #219a52;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+        }
+
+        .page-sign-info {
+            background: #e8f5e9;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #2e7d32;
+            text-align: center;
+        }
+
+        .faq-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .faq-section h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .faq-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .faq-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .faq-item h4::before {
+            content: "❓";
+            color: #3498db;
+        }
+
+        .faq-item p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            margin-left: 26px;
+        }
+
+        .highlight {
+            color: #3498db;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .two-columns { flex-direction: column; }
+            .faq-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>PDF Signer <span class="badge">100% Local</span></h1>
+    <p class="subtitle">Sign PDF documents online for free. Each page can have its own signature. Drag to position. All processing in your browser - no upload.</p>
+
+    <!-- 步骤1：加载 PDF -->
+    <div class="step-section" id="step1-section">
+        <div class="step-title">
+            <span class="step-badge" id="step1-badge">1</span> Load PDF Document
+        </div>
+        <div class="upload-area" id="upload-area">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <p style="margin: 12px 0; font-weight: 500;">Click or drag & drop PDF file here</p>
+            <p style="font-size: 12px; color: #999;">Supports PDF files | Max 20MB</p>
+            <input type="file" id="file-input" accept=".pdf" style="display: none;">
+        </div>
+        <div id="file-info-bar" class="file-info-bar" style="display: none;">
+            <div class="file-info">
+                <span>📄 <strong id="file-name-display">-</strong></span>
+                <span>📐 Pages: <strong id="page-count">0</strong></span>
+            </div>
+            <div id="loading-indicator" style="display: none; color: #3498db;">Loading PDF...</div>
+        </div>
+    </div>
+
+    <!-- PDF 预览区域 -->
+    <div class="pdf-preview-section" id="pdf-preview-section">
+        <div class="step-title">
+            <span class="step-badge" id="preview-badge">📄</span> PDF Preview & Signature Positioning
+        </div>
+        <div class="pdf-preview-container" id="pdf-preview-container">
+            <canvas id="pdf-canvas" class="pdf-page-canvas"></canvas>
+            <div id="signature-overlay" class="signature-overlay"></div>
+        </div>
+        <div class="drag-hint">✨ Click and drag the blue box to reposition the signature for the CURRENT page</div>
+        <div class="page-nav" id="page-nav" style="display: none;">
+            <button id="prev-page">← Previous</button>
+            <span id="page-info">Page 1 / 1</span>
+            <button id="next-page">Next →</button>
+        </div>
+        <div id="page-sign-status" class="page-sign-info" style="display: none;"></div>
+    </div>
+
+    <!-- 步骤2：签名设置 -->
+    <div id="step2-section" style="display: none;">
+        <div class="step-section">
+            <div class="step-title">
+                <span class="step-badge" id="step2-badge">2</span> Create Signature & Apply to Current Page
+            </div>
+
+            <div class="two-columns">
+                <div class="settings-panel">
+                    <h3 style="margin-bottom: 20px;">✍️ Signature Settings</h3>
+
+                    <div class="form-group">
+                        <label>Signature Type</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="sign-type" value="draw" checked> ✏️ Draw Signature</label>
+                            <label><input type="radio" name="sign-type" value="text"> 📝 Text Signature</label>
+                            <label><input type="radio" name="sign-type" value="image"> 🖼️ Image Signature</label>
+                        </div>
+                    </div>
+
+                    <div id="draw-signature">
+                        <div class="signature-creator">
+                            <div class="signature-canvas-container">
+                                <canvas id="signature-canvas" width="400" height="150" class="signature-canvas" style="width: 100%; height: auto; border-radius: 8px;"></canvas>
+                            </div>
+                            <div class="signature-buttons">
+                                <button class="btn-small btn-clear-sign" id="clear-signature">Clear Canvas</button>
+                                <button class="btn-small btn-save-sign" id="save-signature">Save Signature to Current Page</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="text-signature" style="display: none;">
+                        <div class="signature-creator">
+                            <div class="form-group">
+                                <input type="text" id="signature-name" placeholder="Enter your name" value="John Doe" style="width: 100%; padding: 10px;">
+                            </div>
+                            <div class="form-group font-selector">
+                                <label>Font Style</label>
+                                <select id="signature-font">
+                                    <option value="'Brush Script MT', cursive">Brush Script</option>
+                                    <option value="'Dancing Script', cursive">Dancing Script</option>
+                                    <option value="'Great Vibes', cursive">Great Vibes</option>
+                                    <option value="'Pacifico', cursive">Pacifico</option>
+                                    <option value="'Sacramento', cursive">Sacramento</option>
+                                    <option value="'Alex Brush', cursive">Alex Brush</option>
+                                    <option value="'Allura', cursive">Allura</option>
+                                    <option value="'Monsieur La Doulaise', cursive">Monsieur La Doulaise</option>
+                                    <option value="'Tangerine', cursive">Tangerine</option>
+                                    <option value="'Pinyon Script', cursive">Pinyon Script</option>
+                                    <option value="'Qwigley', cursive">Qwigley</option>
+                                    <option value="'Satisfy', cursive">Satisfy</option>
+                                    <option value="'Mr De Haviland', cursive">Mr De Haviland</option>
+                                    <option value="Arial, sans-serif">Arial</option>
+                                    <option value="'Georgia', serif">Georgia</option>
+                                    <option value="'Times New Roman', serif">Times New Roman</option>
+                                </select>
+                            </div>
+                            <div class="text-sign-preview" id="text-sign-preview">
+                                <span id="preview-text" style="font-family: 'Brush Script MT', cursive;">John Doe</span>
+                            </div>
+                            <div class="signature-buttons">
+                                <button class="btn-small btn-save-sign" id="save-text-signature">Save Signature to Current Page</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="image-signature" style="display: none;">
+                        <div class="signature-creator">
+                            <div class="form-group">
+                                <input type="file" id="signature-image" accept="image/png,image/jpeg,image/webp">
+                                <div id="image-sign-preview" style="margin-top: 10px; display: none;">
+                                    <img id="signature-preview-img" class="image-sign-preview">
+                                </div>
+                            </div>
+                            <div class="signature-buttons">
+                                <button class="btn-small btn-save-sign" id="save-image-signature">Save Signature to Current Page</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Signature Color</label>
+                        <div class="color-presets" id="color-presets">
+                            <div class="color-preset" style="background: #000000;" data-color="#000000"></div>
+                            <div class="color-preset active" style="background: #1a73e8;" data-color="#1a73e8"></div>
+                            <div class="color-preset" style="background: #e74c3c;" data-color="#e74c3c"></div>
+                            <div class="color-preset" style="background: #27ae60;" data-color="#27ae60"></div>
+                            <div class="color-preset" style="background: #8e44ad;" data-color="#8e44ad"></div>
+                            <div class="color-preset" style="background: #f39c12;" data-color="#f39c12"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Opacity</label>
+                        <div class="slider-row">
+                            <input type="range" id="sign-opacity" min="30" max="100" value="90">
+                            <span id="opacity-value">90%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Signature Size (% of page width)</label>
+                        <div class="slider-row">
+                            <input type="range" id="sign-size" min="10" max="30" value="15">
+                            <span id="size-value">15%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-panel">
+                    <button class="btn-primary" id="apply-all-signatures-btn">✍️ Apply All Signatures to PDF</button>
+                    <button class="btn-secondary" id="download-pdf-btn" style="display: none;">📥 Download Signed PDF</button>
+                    <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px; font-size: 13px; color: #555;">
+                        💡 <strong>How it works:</strong><br>
+                        1. Create your signature using the tools on the left<br>
+                        2. Click "Save Signature to Current Page" - it will be saved ONLY for the page you're viewing<br>
+                        3. Use Next/Previous to navigate to other pages and add signatures there<br>
+                        4. Each page can have its own signature at different positions<br>
+                        5. Click "Apply All Signatures to PDF" to generate the final signed document
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ 区域 -->
+    <div class="faq-section">
+        <h3>❓ Frequently Asked Questions</h3>
+        <div class="faq-grid">
+            <div class="faq-item"><h4>Is my PDF uploaded to your server?</h4><p>No, absolutely not. All processing happens <span class="highlight">100% locally in your browser</span>. Your files never leave your device.</p></div>
+            <div class="faq-item"><h4>Can I sign multiple pages?</h4><p>Yes! Each page can have its own signature. Navigate to each page, create your signature, and click "Save Signature to Current Page". The signature will be saved only for that specific page.</p></div>
+            <div class="faq-item"><h4>Can I reposition the signature?</h4><p>Yes! After saving a signature to a page, simply <span class="highlight">click and drag the blue box</span> on the PDF preview to move it. The position is saved for that page.</p></div>
+            <div class="faq-item"><h4>Does this create a legally binding signature?</h4><p>This tool adds a visual signature representation. For legally binding digital signatures, you need a certificate-based solution like DocuSign or Adobe Sign.</p></div>
+        </div>
+    </div>
+</div>
+
+<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Monsieur+La+Doulaise&family=Mr+De+Haviland&family=Pacifico&family=Pinyon+Script&family=Qwigley&family=Sacramento&family=Satisfy&family=Tangerine:wght@400;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // DOM 元素
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const fileInfoBar = document.getElementById('file-info-bar');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const pageCountSpan = document.getElementById('page-count');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const pdfPreviewSection = document.getElementById('pdf-preview-section');
+    const step2Section = document.getElementById('step2-section');
+    const applyAllBtn = document.getElementById('apply-all-signatures-btn');
+    const downloadBtn = document.getElementById('download-pdf-btn');
+    const pdfCanvas = document.getElementById('pdf-canvas');
+    const signatureOverlay = document.getElementById('signature-overlay');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageInfoSpan = document.getElementById('page-info');
+    const pageSignStatus = document.getElementById('page-sign-status');
+    const signOpacity = document.getElementById('sign-opacity');
+    const opacityValue = document.getElementById('opacity-value');
+    const signSize = document.getElementById('sign-size');
+    const sizeValue = document.getElementById('size-value');
+
+    // 签名相关
+    const drawCanvas = document.getElementById('signature-canvas');
+    let ctx = drawCanvas.getContext('2d');
+    let drawing = false;
+    let currentSignatureBlob = null;  // 当前正在编辑的签名（未保存到页面的临时签名）
+    let currentSignatureType = 'draw';
+    let currentSignatureColor = '#1a73e8';
+
+    // PDF 相关
+    let originalPdfBytesCopy = null;
+    let pdfDoc = null;
+    let currentPage = 1;
+    let totalPages = 0;
+    let currentPageRenderTask = null;
+    
+    // 存储每一页的签名数据 { pageNum: { blob, positionX, positionY, size, opacity } }
+    let pageSignatures = {};
+
+    // 当前页面正在拖拽的位置（百分比）
+    let currentPagePosition = { x: 70, y: 85 };
+
+    // 文字签名元素
+    const signatureName = document.getElementById('signature-name');
+    const signatureFont = document.getElementById('signature-font');
+    const previewTextSpan = document.getElementById('preview-text');
+
+    function updateTextPreview() {
+        const name = signatureName.value || 'Your Name';
+        const font = signatureFont.value;
+        previewTextSpan.style.fontFamily = font;
+        previewTextSpan.textContent = name;
+    }
+    signatureName.addEventListener('input', updateTextPreview);
+    signatureFont.addEventListener('change', updateTextPreview);
+    updateTextPreview();
+
+    // ==================== 签名绘制 ====================
+    function initDrawCanvas() {
+        drawCanvas.width = 400;
+        drawCanvas.height = 150;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+        ctx.strokeStyle = currentSignatureColor;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+    }
+
+    function startDrawing(e) {
+        drawing = true;
+        const rect = drawCanvas.getBoundingClientRect();
+        const scaleX = drawCanvas.width / rect.width;
+        const scaleY = drawCanvas.height / rect.height;
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.stroke();
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const rect = drawCanvas.getBoundingClientRect();
+        const scaleX = drawCanvas.width / rect.width;
+        const scaleY = drawCanvas.height / rect.height;
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+
+    function stopDrawing() { drawing = false; }
+
+    drawCanvas.addEventListener('mousedown', startDrawing);
+    drawCanvas.addEventListener('mousemove', draw);
+    drawCanvas.addEventListener('mouseup', stopDrawing);
+    drawCanvas.addEventListener('mouseleave', stopDrawing);
+    drawCanvas.addEventListener('touchstart', startDrawing);
+    drawCanvas.addEventListener('touchmove', draw);
+    drawCanvas.addEventListener('touchend', stopDrawing);
+
+    document.getElementById('clear-signature').addEventListener('click', () => {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, drawCanvas.width, drawCanvas.height);
+        ctx.strokeStyle = currentSignatureColor;
+    });
+
+    // 生成手写签名 Blob
+    function generateDrawSignatureBlob() {
+        return new Promise((resolve) => {
+            drawCanvas.toBlob(resolve, 'image/png');
+        });
+    }
+
+    // 生成文字签名 Blob
+    async function generateTextSignatureBlob() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 500;
+        canvas.height = 150;
+        const tCtx = canvas.getContext('2d');
+        tCtx.fillStyle = 'white';
+        tCtx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        const name = signatureName.value || 'Your Name';
+        const fontFamily = signatureFont.value;
+        tCtx.font = `bold 56px ${fontFamily}`;
+        tCtx.fillStyle = currentSignatureColor;
+        tCtx.textAlign = 'center';
+        tCtx.textBaseline = 'middle';
+        
+        let fontSize = 56;
+        let textWidth = tCtx.measureText(name).width;
+        while (textWidth > canvas.width - 40 && fontSize > 24) {
+            fontSize -= 4;
+            tCtx.font = `bold ${fontSize}px ${fontFamily}`;
+            textWidth = tCtx.measureText(name).width;
+        }
+        
+        tCtx.fillText(name, canvas.width/2, canvas.height/2);
+        
+        return new Promise((resolve) => {
+            canvas.toBlob(resolve, 'image/png');
+        });
+    }
+
+    // 保存签名到当前页面
+    async function saveSignatureToCurrentPage() {
+        if (!pdfDoc) {
+            alert('Please load a PDF first');
+            return;
+        }
+        
+        let signatureBlob;
+        if (currentSignatureType === 'draw') {
+            signatureBlob = await generateDrawSignatureBlob();
+        } else if (currentSignatureType === 'text') {
+            signatureBlob = await generateTextSignatureBlob();
+        } else if (currentSignatureType === 'image' && currentSignatureBlob) {
+            signatureBlob = currentSignatureBlob;
+        } else {
+            alert('Please create a signature first');
+            return;
+        }
+        
+        // 保存到当前页面
+        pageSignatures[currentPage] = {
+            blob: signatureBlob,
+            positionX: currentPagePosition.x,
+            positionY: currentPagePosition.y,
+            size: parseInt(signSize.value),
+            opacity: parseInt(signOpacity.value)
+        };
+        
+        // 更新页面状态显示
+        updatePageStatusDisplay();
+        
+        // 刷新预览，显示刚保存的签名
+        await renderPage(currentPage);
+        updateSignatureOverlay();
+        
+        alert(`Signature saved to page ${currentPage}!`);
+    }
+
+    // 更新当前页面的签名状态显示
+    function updatePageStatusDisplay() {
+        if (pageSignatures[currentPage]) {
+            pageSignStatus.style.display = 'block';
+            pageSignStatus.innerHTML = `✅ Page ${currentPage} has a signature saved. Drag the blue box to reposition, or save a new signature to replace it.`;
+        } else {
+            pageSignStatus.style.display = 'none';
+        }
+    }
+
+    // 图片签名
+    const signatureImageInput = document.getElementById('signature-image');
+    const imageSignPreview = document.getElementById('image-sign-preview');
+    const signaturePreviewImg = document.getElementById('signature-preview-img');
+    signatureImageInput.addEventListener('change', (e) => {
+        if (e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                signaturePreviewImg.src = event.target.result;
+                imageSignPreview.style.display = 'block';
+            };
+            reader.readAsDataURL(e.target.files[0]);
+            currentSignatureBlob = e.target.files[0];
+        }
+    });
+
+    document.getElementById('save-image-signature').addEventListener('click', () => {
+        if (currentSignatureBlob) {
+            saveSignatureToCurrentPage();
+        } else {
+            alert('Please upload an image first');
+        }
+    });
+
+    // 签名类型切换
+    document.querySelectorAll('input[name="sign-type"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            currentSignatureType = e.target.value;
+            document.getElementById('draw-signature').style.display = currentSignatureType === 'draw' ? 'block' : 'none';
+            document.getElementById('text-signature').style.display = currentSignatureType === 'text' ? 'block' : 'none';
+            document.getElementById('image-signature').style.display = currentSignatureType === 'image' ? 'block' : 'none';
+        });
+    });
+
+    // 颜色预设
+    document.querySelectorAll('.color-preset').forEach(preset => {
+        preset.addEventListener('click', () => {
+            document.querySelectorAll('.color-preset').forEach(p => p.classList.remove('active'));
+            preset.classList.add('active');
+            currentSignatureColor = preset.getAttribute('data-color');
+            ctx.strokeStyle = currentSignatureColor;
+        });
+    });
+
+    signOpacity.addEventListener('input', () => {
+        opacityValue.textContent = signOpacity.value + '%';
+        if (pageSignatures[currentPage]) {
+            // 更新当前页面签名的透明度并刷新预览
+            pageSignatures[currentPage].opacity = parseInt(signOpacity.value);
+            renderPage(currentPage);
+            updateSignatureOverlay();
+        }
+    });
+
+    signSize.addEventListener('input', () => {
+        sizeValue.textContent = signSize.value + '%';
+        if (pageSignatures[currentPage]) {
+            pageSignatures[currentPage].size = parseInt(signSize.value);
+            renderPage(currentPage);
+            updateSignatureOverlay();
+        }
+    });
+
+    // ==================== PDF 处理 ====================
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = '#3498db'; });
+    uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = '#ccc'; });
+    uploadArea.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#ccc';
+        const file = e.dataTransfer.files[0];
+        if (file && file.type === 'application/pdf') await loadPDF(file);
+        else alert('Please upload a valid PDF file');
+    });
+    fileInput.addEventListener('change', async (e) => { if (e.target.files[0]) await loadPDF(e.target.files[0]); fileInput.value = ''; });
+
+    async function loadPDF(file) {
+        if (file.size > 20 * 1024 * 1024) { alert('File size exceeds 20MB limit'); return; }
+        
+        loadingIndicator.style.display = 'block';
+        fileInfoBar.style.display = 'flex';
+        fileNameDisplay.textContent = file.name;
+        
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            originalPdfBytesCopy = new Uint8Array(arrayBuffer.slice(0));
+            pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            totalPages = pdfDoc.numPages;
+            pageCountSpan.textContent = totalPages;
+            currentPage = 1;
+            pageSignatures = {};
+            currentPagePosition = { x: 70, y: 85 };
+            
+            pdfPreviewSection.style.display = 'block';
+            step2Section.style.display = 'block';
+            downloadBtn.style.display = 'none';
+            
+            await renderPage(currentPage);
+            
+            initDrawCanvas();
+            
+        } catch (error) {
+            console.error('Error loading PDF:', error);
+            alert('Failed to load PDF. Please check if the file is valid.');
+            fileInfoBar.style.display = 'none';
+            pdfPreviewSection.style.display = 'none';
+            step2Section.style.display = 'none';
+        } finally {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+
+    async function renderPage(pageNum) {
+        if (currentPageRenderTask) currentPageRenderTask.cancel();
+        const page = await pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.5 });
+        pdfCanvas.width = viewport.width;
+        pdfCanvas.height = viewport.height;
+        const renderContext = { canvasContext: pdfCanvas.getContext('2d'), viewport: viewport };
+        currentPageRenderTask = page.render(renderContext);
+        await currentPageRenderTask.promise;
+        pageInfoSpan.textContent = `Page ${pageNum} / ${totalPages}`;
+        prevPageBtn.disabled = pageNum === 1;
+        nextPageBtn.disabled = pageNum === totalPages;
+        document.getElementById('page-nav').style.display = totalPages > 1 ? 'flex' : 'none';
+        
+        // 如果有当前页的签名，更新位置和大小滑块
+        if (pageSignatures[pageNum]) {
+            const sig = pageSignatures[pageNum];
+            currentPagePosition = { x: sig.positionX, y: sig.positionY };
+            signSize.value = sig.size;
+            sizeValue.textContent = sig.size + '%';
+            signOpacity.value = sig.opacity;
+            opacityValue.textContent = sig.opacity + '%';
+        } else {
+            // 没有签名时使用默认位置
+            currentPagePosition = { x: 70, y: 85 };
+        }
+        
+        updatePageStatusDisplay();
+        updateSignatureOverlay();
+    }
+
+    prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderPage(currentPage); } });
+    nextPageBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderPage(currentPage); } });
+
+    function updateSignatureOverlay() {
+        const signature = pageSignatures[currentPage];
+        if (!signature) {
+            signatureOverlay.style.display = 'none';
+            return;
+        }
+        
+        signatureOverlay.style.display = 'flex';
+        const canvasRect = pdfCanvas.getBoundingClientRect();
+        if (canvasRect.width === 0) return;
+        
+        const signWidth = canvasRect.width * (signature.size / 100);
+        const signHeight = signWidth * 0.4;
+        const left = (signature.positionX / 100) * canvasRect.width - signWidth / 2;
+        const top = (signature.positionY / 100) * canvasRect.height - signHeight / 2;
+        
+        signatureOverlay.style.left = `${Math.max(0, Math.min(canvasRect.width - signWidth, left))}px`;
+        signatureOverlay.style.top = `${Math.max(0, Math.min(canvasRect.height - signHeight, top))}px`;
+        signatureOverlay.style.width = `${signWidth}px`;
+        signatureOverlay.style.height = `${signHeight}px`;
+    }
+
+    // 拖拽签名框 - 更新当前页面的签名位置
+    let isDraggingOverlay = false;
+    signatureOverlay.addEventListener('mousedown', (e) => { 
+        e.preventDefault(); 
+        isDraggingOverlay = true; 
+        document.addEventListener('mousemove', onOverlayMove); 
+        document.addEventListener('mouseup', onOverlayUp); 
+    });
+    
+    function onOverlayMove(e) {
+        if (!isDraggingOverlay) return;
+        const canvasRect = pdfCanvas.getBoundingClientRect();
+        const signWidth = parseFloat(signatureOverlay.style.width);
+        const signHeight = parseFloat(signatureOverlay.style.height);
+        let left = e.clientX - canvasRect.left - signWidth / 2;
+        let top = e.clientY - canvasRect.top - signHeight / 2;
+        left = Math.max(0, Math.min(canvasRect.width - signWidth, left));
+        top = Math.max(0, Math.min(canvasRect.height - signHeight, top));
+        signatureOverlay.style.left = `${left}px`;
+        signatureOverlay.style.top = `${top}px`;
+        
+        // 更新位置（百分比）
+        const newX = ((left + signWidth / 2) / canvasRect.width) * 100;
+        const newY = ((top + signHeight / 2) / canvasRect.height) * 100;
+        currentPagePosition = { x: Math.max(5, Math.min(95, newX)), y: Math.max(5, Math.min(95, newY)) };
+        
+        // 如果当前页已有签名，实时更新位置
+        if (pageSignatures[currentPage]) {
+            pageSignatures[currentPage].positionX = currentPagePosition.x;
+            pageSignatures[currentPage].positionY = currentPagePosition.y;
+        }
+    }
+    
+    function onOverlayUp() { 
+        isDraggingOverlay = false; 
+        document.removeEventListener('mousemove', onOverlayMove); 
+        document.removeEventListener('mouseup', onOverlayUp); 
+    }
+
+    // 应用所有签名到 PDF
+    async function applyAllSignaturesToPDF() {
+        if (!originalPdfBytesCopy) {
+            alert('Please load a PDF first');
+            return;
+        }
+        
+        if (Object.keys(pageSignatures).length === 0) {
+            alert('No signatures to apply. Please add signatures to at least one page first.');
+            return;
+        }
+        
+        applyAllBtn.disabled = true;
+        applyAllBtn.textContent = '⏳ Applying signatures...';
+        
+        try {
+            const pdfDocLib = await PDFLib.PDFDocument.load(originalPdfBytesCopy.slice(0));
+            const pages = pdfDocLib.getPages();
+            
+            for (const [pageNumStr, signature] of Object.entries(pageSignatures)) {
+                const pageNum = parseInt(pageNumStr) - 1; // 0-index
+                if (pageNum >= pages.length) continue;
+                
+                const targetPage = pages[pageNum];
+                const { width, height } = targetPage.getSize();
+                
+                const signWidthPx = width * (signature.size / 100);
+                const signHeightPx = signWidthPx * 0.4;
+                const x = (signature.positionX / 100) * width - signWidthPx / 2;
+                const y = height - ((signature.positionY / 100) * height - signHeightPx / 2);
+                
+                const imageBytes = await signature.blob.arrayBuffer();
+                let pngImage;
+                
+                if (signature.blob.type === 'image/png') {
+                    pngImage = await pdfDocLib.embedPng(imageBytes);
+                } else if (signature.blob.type === 'image/jpeg' || signature.blob.type === 'image/jpg') {
+                    pngImage = await pdfDocLib.embedJpg(imageBytes);
+                } else {
+                    pngImage = await pdfDocLib.embedPng(imageBytes);
+                }
+                
+                targetPage.drawImage(pngImage, {
+                    x: Math.max(0, Math.min(width - signWidthPx, x)),
+                    y: Math.max(0, Math.min(height - signHeightPx, y)),
+                    width: signWidthPx,
+                    height: signHeightPx,
+                    opacity: signature.opacity / 100
+                });
+            }
+            
+            window.signedPdfBytes = await pdfDocLib.save();
+            downloadBtn.style.display = 'block';
+            applyAllBtn.textContent = '✓ All Signatures Applied!';
+            setTimeout(() => { applyAllBtn.textContent = '✍️ Apply All Signatures to PDF'; }, 3000);
+            
+        } catch (error) {
+            console.error('Apply signatures error:', error);
+            alert('Failed to apply signatures: ' + error.message);
+            applyAllBtn.textContent = '✍️ Apply All Signatures to PDF';
+        }
+        applyAllBtn.disabled = false;
+    }
+
+    function downloadSignedPDF() {
+        if (!window.signedPdfBytes) { alert('No signed PDF available. Please apply signatures first.'); return; }
+        const blob = new Blob([window.signedPdfBytes], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'signed_document.pdf';
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    // 绑定事件
+    document.getElementById('save-signature').addEventListener('click', saveSignatureToCurrentPage);
+    document.getElementById('save-text-signature').addEventListener('click', saveSignatureToCurrentPage);
+    applyAllBtn.addEventListener('click', applyAllSignaturesToPDF);
+    downloadBtn.addEventListener('click', downloadSignedPDF);
+    
+    initDrawCanvas();
+</script>
+</body>
+</html>

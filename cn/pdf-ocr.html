@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>PDF OCR - 提取文字 & 生成可搜索PDF | 100%本地处理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .upload-area svg {
+            width: 48px;
+            height: 48px;
+            stroke: #666;
+        }
+
+        .lang-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .lang-section h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .lang-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .file-info {
+            background: #e8f4fd;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .file-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .mode-section {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .mode-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .mode-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.3s;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .action-btn:hover {
+            background: #219a52;
+        }
+
+        .progress-area {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            margin: 15px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #27ae60;
+            transition: width 0.3s;
+        }
+
+        .result-text {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .result-header h3 {
+            color: #333;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-secondary {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+        }
+
+        .btn-outline {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-outline:hover {
+            background: #5a6268;
+        }
+
+        .extracted-text {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 450px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .result-pdf {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+            padding: 25px;
+            background: #e8f5e9;
+            border-radius: 16px;
+        }
+
+        .result-pdf h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .result-pdf .stats {
+            margin: 15px 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .download-pdf-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .faq-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .faq-section h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .faq-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .faq-item h4::before {
+            content: "❓";
+            font-size: 14px;
+            color: #3498db;
+        }
+
+        .faq-item p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #555;
+            margin-left: 26px;
+        }
+
+        .highlight {
+            color: #3498db;
+            font-weight: 500;
+        }
+
+        .warning-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .error-note {
+            background: #f8d7da;
+            border-left: 4px solid #e74c3c;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+            color: #721c24;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 24px 20px; }
+            h1 { font-size: 24px; }
+            .result-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>PDF OCR - 提取文字 & 生成可搜索PDF <span class="badge">100% 本地处理</span></h1>
+    <p class="subtitle">从扫描版 PDF 中提取文字，或生成可搜索的 PDF。所有处理均在浏览器中完成 — 不上传，不存储。</p>
+
+    <div class="upload-area" id="upload-area">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 21h14"/>
+            <rect x="4" y="14" width="16" height="4" rx="1"/>
+        </svg>
+        <p style="margin: 12px 0; font-weight: 500;">点击或拖拽 PDF 文件至此</p>
+        <input type="file" id="file-input" accept=".pdf" style="display: none;">
+        <p style="font-size: 12px; color: #999; margin-top: 8px;">最多 10 页 | 支持扫描件/图片型 PDF</p>
+    </div>
+
+    <div class="lang-section" id="lang-section">
+        <h3>🌐 OCR 识别语言</h3>
+        <select class="lang-select" id="lang-select">
+            <option value="eng">英语 (English)</option>
+            <option value="chi_sim" selected>简体中文 (Chinese Simplified)</option>
+            <option value="chi_tra">繁体中文 (Chinese Traditional)</option>
+            <option value="jpn">日语 (Japanese)</option>
+            <option value="kor">韩语 (Korean)</option>
+            <option value="fra">法语 (French)</option>
+            <option value="deu">德语 (German)</option>
+            <option value="spa">西班牙语 (Spanish)</option>
+            <option value="ara">阿拉伯语 (Arabic)</option>
+            <option value="rus">俄语 (Russian)</option>
+            <option value="ita">意大利语 (Italian)</option>
+            <option value="por">葡萄牙语 (Portuguese)</option>
+            <option value="vie">越南语 (Vietnamese)</option>
+            <option value="tha">泰语 (Thai)</option>
+        </select>
+    </div>
+
+    <div class="file-info" id="file-info">
+        <p><strong>📄 文件：</strong> <span id="filename"></span></p>
+        <p><strong>📐 页数：</strong> <span id="page-count"></span> 页</p>
+        <p><strong>📏 大小：</strong> <span id="file-size"></span></p>
+    </div>
+
+    <div class="mode-section" id="mode-section">
+        <div class="mode-title">选择输出模式</div>
+        <select class="mode-select" id="mode-select">
+            <option value="text">📝 仅提取文字</option>
+            <option value="pdf">📄 生成可搜索 PDF</option>
+        </select>
+    </div>
+
+    <button class="action-btn" id="action-btn">开始 OCR 识别</button>
+
+    <div class="progress-area" id="progress-area">
+        <div class="spinner"></div>
+        <p class="progress-text" id="progress-text">初始化中...</p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <div class="error-note" id="error-note">
+        ⚠️ <strong>OCR 错误：</strong> <span id="error-message"></span>
+    </div>
+
+    <div class="result-text" id="result-text">
+        <div class="result-header">
+            <h3>📝 提取的文字内容</h3>
+            <div class="btn-group">
+                <button class="btn-secondary" id="copy-btn">📋 复制到剪贴板</button>
+                <button class="btn-secondary" id="download-txt-btn">💾 下载为 TXT</button>
+                <button class="btn-outline" id="new-file-btn">🔄 处理新文件</button>
+            </div>
+        </div>
+        <div class="extracted-text" id="extracted-text"></div>
+    </div>
+
+    <div class="result-pdf" id="result-pdf">
+        <div style="font-size: 48px;">✅</div>
+        <h3>可搜索 PDF 已生成！</h3>
+        <div class="stats" id="pdf-stats"></div>
+        <div>
+            <button class="download-pdf-btn" id="download-pdf-btn">📥 下载可搜索 PDF</button>
+            <button class="btn-outline" id="pdf-new-file-btn">🔄 处理其他 PDF</button>
+        </div>
+        <div class="warning-note" style="margin-top: 15px;">
+            💡 <strong>说明：</strong> 生成的 PDF 包含隐形文字层，您可以在任何 PDF 阅读器中搜索、复制和标记文字。
+        </div>
+    </div>
+
+    <div class="faq-section">
+        <h3>❓ 常见问题</h3>
+        <div class="faq-item">
+            <h4>PDF 文件会被上传到服务器吗？</h4>
+            <p>绝对不会！本工具 <span class="highlight">100% 在浏览器本地运行</span>，使用 Tesseract.js 进行 OCR，文件永不离开您的设备。</p>
+        </div>
+        <div class="faq-item">
+            <h4>"仅提取文字"和"生成可搜索PDF"有什么区别？</h4>
+            <p><span class="highlight">仅提取文字</span>：直接输出纯文本内容。<span class="highlight">生成可搜索PDF</span>：在原图基础上添加透明文字层，保留原始外观的同时支持搜索和复制。</p>
+        </div>
+        <div class="faq-item">
+            <h4>支持哪些语言？</h4>
+            <p>支持 <span class="highlight">100+ 种语言</span>，包括中文（简/繁）、英语、日语、韩语、法语、德语、西班牙语、阿拉伯语等。</p>
+        </div>
+        <div class="faq-item">
+            <h4>文件大小和页数限制？</h4>
+            <p>为获得最佳性能，建议 PDF 不超过 <span class="highlight">30MB</span> 且不超过 <span class="highlight">10 页</span>。大型文件可能需要更长时间处理。</p>
+        </div>
+        <div class="faq-item">
+            <h4>识别效果如何？</h4>
+            <p>对于清晰扫描件效果优秀，手写体或低分辨率图片效果会有所下降。建议使用 150DPI 以上的扫描文件。</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    let originalFile = null;
+    let originalFileName = '';
+    let totalPages = 0;
+    let currentMode = 'text';
+    let pageTexts = [];
+    let pageImages = [];
+    let isProcessing = false;
+
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const langSection = document.getElementById('lang-section');
+    const fileInfo = document.getElementById('file-info');
+    const modeSection = document.getElementById('mode-section');
+    const actionBtn = document.getElementById('action-btn');
+    const progressArea = document.getElementById('progress-area');
+    const progressText = document.getElementById('progress-text');
+    const progressFill = document.getElementById('progress-fill');
+    const resultTextDiv = document.getElementById('result-text');
+    const resultPdfDiv = document.getElementById('result-pdf');
+    const extractedTextDiv = document.getElementById('extracted-text');
+    const filenameSpan = document.getElementById('filename');
+    const pageCountSpan = document.getElementById('page-count');
+    const fileSizeSpan = document.getElementById('file-size');
+    const errorNote = document.getElementById('error-note');
+    const errorMessage = document.getElementById('error-message');
+    const modeSelect = document.getElementById('mode-select');
+
+    modeSelect.addEventListener('change', () => {
+        currentMode = modeSelect.value;
+    });
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorNote.style.display = 'block';
+        setTimeout(() => {
+            errorNote.style.display = 'none';
+        }, 8000);
+    }
+
+    function hideError() {
+        errorNote.style.display = 'none';
+    }
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#3498db';
+        uploadArea.style.background = '#f0f8ff';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#ccc';
+        uploadArea.style.background = 'transparent';
+    });
+
+    uploadArea.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#ccc';
+        uploadArea.style.background = 'transparent';
+        const file = e.dataTransfer.files[0];
+        if (file && file.type === 'application/pdf') {
+            await loadPDF(file);
+        } else {
+            alert('请上传有效的 PDF 文件');
+        }
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+        if (e.target.files[0]) {
+            await loadPDF(e.target.files[0]);
+        }
+    });
+
+    async function loadPDF(file) {
+        if (!file || file.type !== 'application/pdf') {
+            alert('请选择有效的 PDF 文件');
+            return;
+        }
+
+        if (file.size > 30 * 1024 * 1024) {
+            alert('文件超过 30MB 限制，请使用较小的文件');
+            return;
+        }
+
+        try {
+            originalFile = file;
+            originalFileName = file.name.replace(/\.pdf$/i, '');
+
+            const arrayBuffer = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+            
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            totalPages = Math.min(pdf.numPages, 10);
+
+            if (pdf.numPages > 10) {
+                alert('PDF 超过 10 页，为性能考虑，仅处理前 10 页');
+            }
+
+            filenameSpan.textContent = file.name;
+            pageCountSpan.textContent = totalPages;
+            fileSizeSpan.textContent = formatFileSize(file.size);
+
+            fileInfo.style.display = 'block';
+            langSection.style.display = 'block';
+            modeSection.style.display = 'block';
+            actionBtn.style.display = 'block';
+            resultTextDiv.style.display = 'none';
+            resultPdfDiv.style.display = 'none';
+            progressArea.style.display = 'none';
+            hideError();
+
+        } catch (error) {
+            console.error('PDF 加载失败:', error);
+            alert('PDF 加载失败，请确认文件未损坏');
+        }
+    }
+
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    async function renderPageFromFile(file, pageNum, scale = 1.8) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const arrayBuffer = await new Promise((res, rej) => {
+                    const reader = new FileReader();
+                    reader.onload = () => res(reader.result);
+                    reader.onerror = rej;
+                    reader.readAsArrayBuffer(file);
+                });
+                
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: scale });
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                const context = canvas.getContext('2d');
+                
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                
+                const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+                const base64 = await blobToBase64(blob);
+                
+                canvas.width = 0;
+                canvas.height = 0;
+                
+                resolve(base64);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    async function startOCR() {
+        if (!originalFile) {
+            alert('请先上传 PDF 文件');
+            return;
+        }
+
+        if (isProcessing) {
+            alert('正在处理中，请稍候...');
+            return;
+        }
+
+        isProcessing = true;
+        const selectedLang = document.getElementById('lang-select').value;
+        
+        pageTexts = [];
+        pageImages = [];
+        hideError();
+        
+        fileInfo.style.display = 'none';
+        langSection.style.display = 'none';
+        modeSection.style.display = 'none';
+        actionBtn.style.display = 'none';
+        progressArea.style.display = 'block';
+        resultTextDiv.style.display = 'none';
+        resultPdfDiv.style.display = 'none';
+        
+        progressFill.style.width = '0%';
+        
+        try {
+            let successCount = 0;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                const percent = ((i - 1) / totalPages) * 100;
+                progressFill.style.width = `${percent}%`;
+                progressText.textContent = `正在处理第 ${i} / ${totalPages} 页...`;
+                
+                try {
+                    progressText.textContent = `第 ${i} 页：渲染图像...`;
+                    const base64Image = await renderPageFromFile(originalFile, i, 1.8);
+                    pageImages.push(base64Image);
+                    
+                    progressText.textContent = `第 ${i} 页：OCR 识别中...`;
+                    
+                    const { data: { text } } = await Tesseract.recognize(base64Image, selectedLang, {
+                        logger: (m) => {
+                            if (m.status === 'recognizing text') {
+                                const pct = Math.round(m.progress * 100);
+                                progressText.textContent = `第 ${i} 页：识别进度 ${pct}%`;
+                            }
+                        }
+                    });
+                    
+                    pageTexts.push({
+                        pageNum: i,
+                        text: text.trim() || '(未检测到文字)'
+                    });
+                    
+                    successCount++;
+                    
+                } catch (pageError) {
+                    console.error(`第 ${i} 页错误:`, pageError);
+                    pageTexts.push({
+                        pageNum: i,
+                        text: `(第 ${i} 页处理失败: ${pageError.message})`
+                    });
+                    pageImages.push(null);
+                }
+                
+                await new Promise(r => setTimeout(r, 30));
+            }
+            
+            progressFill.style.width = '100%';
+            progressText.textContent = '生成结果中...';
+            
+            if (successCount === 0) {
+                throw new Error('所有页面均处理失败，请检查 PDF 文件是否包含可识别的图像');
+            }
+            
+            if (currentMode === 'text') {
+                displayTextResult();
+            } else {
+                const validImages = pageImages.filter(img => img !== null);
+                if (validImages.length === 0) {
+                    throw new Error('没有有效的图像来生成 PDF');
+                }
+                await createSearchablePDF();
+            }
+            
+        } catch (error) {
+            console.error('OCR 错误:', error);
+            showError(error.message || 'OCR 处理失败，请尝试较小的文件或不同的语言设置');
+            resetToUploadState();
+        } finally {
+            isProcessing = false;
+        }
+    }
+    
+    function displayTextResult() {
+        let fullText = '';
+        for (const page of pageTexts) {
+            fullText += `--- 第 ${page.pageNum} 页 ---\n${page.text}\n\n`;
+        }
+        extractedTextDiv.textContent = fullText || '(未检测到文字)';
+        resultTextDiv.style.display = 'block';
+        progressArea.style.display = 'none';
+    }
+    
+    async function createSearchablePDF() {
+        progressText.textContent = '正在生成可搜索 PDF...';
+        progressFill.style.width = '0%';
+        
+        try {
+            const pdfDoc = await PDFLib.PDFDocument.create();
+            const font = await pdfDoc.embedStandardFont('Helvetica');
+            
+            let validPages = 0;
+            const totalValid = pageImages.filter(img => img !== null).length;
+            
+            for (let i = 0; i < pageImages.length; i++) {
+                const base64Image = pageImages[i];
+                const pageText = pageTexts[i]?.text || '';
+                
+                if (!base64Image) continue;
+                
+                progressText.textContent = `生成 PDF：第 ${validPages + 1}/${totalValid} 页`;
+                progressFill.style.width = `${(validPages / totalValid) * 100}%`;
+                
+                try {
+                    const base64Data = base64Image.split(',')[1];
+                    const binaryData = atob(base64Data);
+                    const bytes = new Uint8Array(binaryData.length);
+                    for (let j = 0; j < binaryData.length; j++) {
+                        bytes[j] = binaryData.charCodeAt(j);
+                    }
+                    
+                    const pngImage = await pdfDoc.embedPng(bytes);
+                    const { width, height } = pngImage.scale(1);
+                    
+                    const page = pdfDoc.addPage([width, height]);
+                    
+                    page.drawImage(pngImage, {
+                        x: 0,
+                        y: 0,
+                        width: width,
+                        height: height,
+                    });
+                    
+                    // 添加透明文字层（位置适当分布）
+                    const lines = pageText.split('\n').filter(l => l.trim().length > 0);
+                    let yOffset = height - 35;
+                    const fontSize = 11;
+                    
+                    for (const line of lines) {
+                        if (yOffset > 25) {
+                            const shortLine = line.length > 200 ? line.substring(0, 200) + '...' : line;
+                            page.drawText(shortLine, {
+                                x: 25,
+                                y: yOffset,
+                                size: fontSize,
+                                font: font,
+                                opacity: 0,
+                            });
+                            yOffset -= fontSize + 2;
+                        }
+                    }
+                    
+                    validPages++;
+                    
+                } catch (pageError) {
+                    console.error(`添加第 ${i+1} 页时出错:`, pageError);
+                }
+            }
+            
+            if (validPages === 0) {
+                throw new Error('没有有效页面可生成 PDF');
+            }
+            
+            const pdfBytes = await pdfDoc.save();
+            
+            document.getElementById('pdf-stats').innerHTML = `
+                ✅ 已处理 ${validPages} 页<br>
+                📄 已添加可搜索文字层<br>
+                💾 文件大小：${formatFileSize(pdfBytes.length)}
+            `;
+            
+            window.searchablePdfBytes = pdfBytes;
+            
+            progressArea.style.display = 'none';
+            resultPdfDiv.style.display = 'block';
+            
+        } catch (error) {
+            console.error('PDF 生成错误:', error);
+            throw new Error('生成可搜索 PDF 失败：' + error.message);
+        }
+    }
+    
+    function downloadSearchablePDF() {
+        if (window.searchablePdfBytes) {
+            const blob = new Blob([window.searchablePdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `${originalFileName}_searchable.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } else {
+            alert('没有可下载的 PDF，请先完成识别');
+        }
+    }
+    
+    function copyToClipboard() {
+        const text = extractedTextDiv.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('文字已复制到剪贴板！');
+        }).catch(() => {
+            alert('复制失败，请手动复制');
+        });
+    }
+    
+    function downloadTXT() {
+        const text = extractedTextDiv.textContent;
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = `${originalFileName}_extracted_text.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+    
+    function resetToUploadState() {
+        originalFile = null;
+        originalFileName = '';
+        totalPages = 0;
+        pageTexts = [];
+        pageImages = [];
+        
+        fileInfo.style.display = 'none';
+        langSection.style.display = 'none';
+        modeSection.style.display = 'none';
+        actionBtn.style.display = 'none';
+        progressArea.style.display = 'none';
+        resultTextDiv.style.display = 'none';
+        resultPdfDiv.style.display = 'none';
+        
+        fileInput.value = '';
+    }
+    
+    function newFile() {
+        resetToUploadState();
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    actionBtn.addEventListener('click', startOCR);
+    document.getElementById('copy-btn').addEventListener('click', copyToClipboard);
+    document.getElementById('download-txt-btn').addEventListener('click', downloadTXT);
+    document.getElementById('new-file-btn').addEventListener('click', newFile);
+    document.getElementById('pdf-new-file-btn').addEventListener('click', newFile);
+    document.getElementById('download-pdf-btn').addEventListener('click', downloadSearchablePDF);
+</script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>PDF转图片工具 - 本地转换，隐私安全</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f7fb;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.5;
+            padding: 1.5rem 1rem;
+            color: #1e293b;
+        }
+
+        /* 主容器 */
+        .pdf-to-image-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            padding: 1.5rem 2rem;
+        }
+
+        /* 响应式内边距 */
+        @media (max-width: 640px) {
+            .pdf-to-image-container {
+                padding: 1.25rem;
+            }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b, #2c3e66);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subhead {
+            text-align: center;
+            color: #475569;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #e9eef3;
+            padding-bottom: 1rem;
+        }
+
+        /* 上传区域 */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 1.25rem;
+            background: #fafcff;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 1rem 0 1rem 0;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: #f0f7ff;
+            transform: scale(0.99);
+        }
+        .upload-icon svg {
+            width: 52px;
+            height: 52px;
+            stroke: #5b6e8c;
+            margin-bottom: 0.75rem;
+        }
+        .upload-zone p {
+            margin: 0.5rem 0;
+            color: #334155;
+            font-weight: 500;
+        }
+        .file-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        /* 加载动画 */
+        .loading-overlay {
+            background: rgba(255,255,240,0.95);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* PDF 信息栏 */
+        .pdf-info-card {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.8rem;
+            border: 1px solid #e9edf2;
+        }
+        .pdf-stats {
+            display: flex;
+            gap: 1rem;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+        .total-badge {
+            background: #e6f0ff;
+            padding: 0.3rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e4c8c;
+        }
+        .reset-upload-btn {
+            background: #eef2f6;
+            border: none;
+            padding: 0.45rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #334155;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .reset-upload-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        /* 批量下载按钮 */
+        .batch-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .batch-btn:hover {
+            background: #1f8f4e;
+            transform: translateY(-1px);
+        }
+
+        /* 页面网格 (更现代紧凑) */
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.2rem;
+        }
+        .page-card {
+            background: white;
+            border: 1px solid #eef2f8;
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .page-card:hover {
+            border-color: #cbdff2;
+            box-shadow: 0 8px 18px -12px rgba(0,0,0,0.1);
+        }
+        .preview-img {
+            width: 100%;
+            background: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid #ecf3f9;
+            max-height: 200px;
+            overflow: hidden;
+        }
+        .preview-img img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            display: block;
+        }
+        .page-meta {
+            padding: 0.9rem 1rem;
+        }
+        .page-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        .page-dim {
+            font-size: 0.7rem;
+            color: #5b6e8c;
+            margin-bottom: 0.8rem;
+        }
+        .download-page-btn {
+            background: #3b82f6;
+            border: none;
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .download-page-btn:hover {
+            background: #2563eb;
+        }
+
+        /* FAQ 区块 */
+        .faq-section {
+            margin-top: 2.5rem;
+            background: #f9fbfe;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            border: 1px solid #edf2f7;
+        }
+        .faq-section h2 {
+            font-size: 1.4rem;
+            text-align: left;
+            margin-bottom: 1rem;
+            background: none;
+            color: #0f172a;
+        }
+        .faq-item {
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #e9edf2;
+        }
+        .faq-item h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .faq-item p {
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.4;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 1.8rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ecf3f9;
+        }
+
+        button {
+            font-family: inherit;
+        }
+    </style>
+    <!-- PDF.js 和 JSZip CDN (完全本地运算，仅加载库文件) -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.6.347/build/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+<div class="pdf-to-image-container">
+    <h2>📄 PDF 转图片工具</h2>
+    <div class="subhead">
+        完全本地转换 · 不上传服务器 · 支持 PNG/批量打包ZIP
+    </div>
+
+    <!-- 上传区域 -->
+    <div id="uploadZone" class="upload-zone">
+        <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 21h14" stroke="currentColor"/>
+                <rect x="4" y="14" width="16" height="4" rx="1" stroke="currentColor"/>
+            </svg>
+        </div>
+        <p>点击或拖拽 PDF 文件至此区域</p>
+        <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
+        <div class="file-hint">最大文件 50MB · 支持多页PDF · 隐私优先</div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div id="loadingArea" style="display: none;">
+        <div class="loading-overlay">
+            <div class="spinner"></div>
+            <p style="color: #2c3e66; font-weight: 500;">🔄 正在解析PDF，请稍候...</p>
+            <p id="pageProgressMsg" style="font-size: 0.8rem; color: #5b6e8c; margin-top: 6px;"></p>
+        </div>
+    </div>
+
+    <!-- PDF 信息栏 -->
+    <div id="pdfInfoBar" style="display: none;">
+        <div class="pdf-info-card">
+            <div class="pdf-stats">
+                <span class="total-badge" id="totalPagesSpan">0 页</span>
+                <span style="font-size: 0.8rem; color:#475569;">✅ 转换完成，图片均在浏览器中生成</span>
+            </div>
+            <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                <div id="batchDownloadContainer"></div>
+                <button id="resetUploadBtn" class="reset-upload-btn">🔄 重新上传</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面缩略图列表区域 -->
+    <div id="pagesGallery" style="display: none; margin-top: 1rem;">
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">📸 页面预览 (点击下载单张)</h3>
+        <div id="pagesGrid" class="pages-grid"></div>
+    </div>
+
+    <!-- FAQ 区块 (本地化中文内容) -->
+    <div class="faq-section">
+        <h2>❓ 常见问题</h2>
+        <div class="faq-item">
+            <h3>我可以免费将 PDF 转换为 JPG 或 PNG 吗？</h3>
+            <p>是的，本工具完全免费，无需注册。支持 PNG 无损格式，也支持保存为高质量图片，所有功能本地运行。</p>
+        </div>
+        <div class="faq-item">
+            <h3>这个工具支持 PDF 转 PNG 还是 JPG？</h3>
+            <p>目前提供 PNG 格式（无损画质），您也可以后续通过其他工具转为 JPG。所有图片均基于原始清晰度渲染。</p>
+        </div>
+        <div class="faq-item">
+            <h3>在线转换 PDF 安全吗？文件会上传吗？</h3>
+            <p>绝对安全！与常规在线转换器不同，您的 PDF 文件完全不会离开您的设备。所有渲染和图片生成均在浏览器内完成，无服务器上传，保护隐私。</p>
+        </div>
+        <div class="faq-item">
+            <h3>最多可以转换多少页？</h3>
+            <p>单次支持最高 100 页的 PDF 文件，每页都会生成高清预览图，并且可以一键打包下载 ZIP 压缩包。</p>
+        </div>
+        <div class="faq-item">
+            <h3>可以从 PDF 中提取内嵌图片吗？</h3>
+            <p>本工具会将每一页渲染为完整图片，适合提取页面截图、图表、扫描件等。若要提取原始图片资源，建议使用专业提取工具，但本功能对常规需求足够强大。</p>
+        </div>
+    </div>
+    <footer>
+        🔒 本地处理 · 零数据上传 · 转换后文件仅存在于您的浏览器中
+    </footer>
+</div>
+
+<script>
+    (function(){
+        // DOM 元素
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('pdfFileInput');
+        const loadingArea = document.getElementById('loadingArea');
+        const pdfInfoBar = document.getElementById('pdfInfoBar');
+        const pagesGallery = document.getElementById('pagesGallery');
+        const pagesGrid = document.getElementById('pagesGrid');
+        const totalPagesSpan = document.getElementById('totalPagesSpan');
+        const batchDownloadContainer = document.getElementById('batchDownloadContainer');
+        const resetBtn = document.getElementById('resetUploadBtn');
+        const pageProgressMsg = document.getElementById('pageProgressMsg');
+
+        // 全局存储页面数据
+        let currentPages = [];      // 存放 { pageNum, imageData, width, height }
+        let currentPdfDoc = null;
+
+        // 配置 PDF.js worker (使用CDN worker)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.6.347/build/pdf.worker.min.js';
+
+        // 重置/清空界面
+        function resetUI() {
+            currentPages = [];
+            currentPdfDoc = null;
+            pagesGrid.innerHTML = '';
+            batchDownloadContainer.innerHTML = '';
+            pdfInfoBar.style.display = 'none';
+            pagesGallery.style.display = 'none';
+            loadingArea.style.display = 'none';
+            fileInput.value = '';   // 清除选中的文件
+            if(pageProgressMsg) pageProgressMsg.innerText = '';
+        }
+
+        // 显示加载进度文字
+        function setProgressText(text) {
+            if(pageProgressMsg) pageProgressMsg.innerText = text;
+        }
+
+        // 渲染页面列表 (卡片风格)
+        function renderPages() {
+            if (!currentPages.length) return;
+            pagesGrid.innerHTML = '';
+            for (let pg of currentPages) {
+                const card = document.createElement('div');
+                card.className = 'page-card';
+
+                // 预览区
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'preview-img';
+                const img = document.createElement('img');
+                img.src = pg.imageData;
+                img.alt = `第 ${pg.pageNum} 页`;
+                img.loading = 'lazy';
+                previewDiv.appendChild(img);
+
+                // 信息区
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'page-meta';
+                metaDiv.innerHTML = `
+                    <div class="page-title">📄 第 ${pg.pageNum} 页</div>
+                    <div class="page-dim">${pg.width} x ${pg.height} px · PNG</div>
+                `;
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'download-page-btn';
+                downloadBtn.innerHTML = '⬇️ 下载此页 (PNG)';
+                downloadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    downloadSingleImage(pg.imageData, `pdf_page_${pg.pageNum}.png`);
+                });
+                metaDiv.appendChild(downloadBtn);
+
+                card.appendChild(previewDiv);
+                card.appendChild(metaDiv);
+                pagesGrid.appendChild(card);
+            }
+            pagesGallery.style.display = 'block';
+        }
+
+        // 单张下载
+        function downloadSingleImage(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 批量打包 ZIP
+        async function downloadAllAsZip() {
+            if (!currentPages.length) {
+                alert('没有可下载的图片，请先转换PDF。');
+                return;
+            }
+            try {
+                const JSZip = window.JSZip;
+                const zip = new JSZip();
+                const folder = zip.folder("pdf_to_png");
+
+                for (const page of currentPages) {
+                    // 从 base64 dataURL 提取二进制
+                    const base64Data = page.imageData.split(',')[1];
+                    const binaryStr = atob(base64Data);
+                    const len = binaryStr.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryStr.charCodeAt(i);
+                    }
+                    folder.file(`page_${page.pageNum}.png`, bytes);
+                }
+                // 添加说明文件
+                const readmeContent = `PDF转PNG记录\n生成时间: ${new Date().toLocaleString()}\n总页数: ${currentPages.length}\n所有图片均为高质量PNG格式。\n本文件由本地工具生成，无任何上传记录。`;
+                folder.file("转换说明.txt", readmeContent);
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(zipBlob);
+                link.download = `pdf_pages_${currentPages.length}页.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+            } catch (err) {
+                console.error('ZIP生成失败:', err);
+                alert('打包失败，可尝试单张下载。');
+            }
+        }
+
+        // 渲染批量下载按钮
+        function renderBatchButton() {
+            batchDownloadContainer.innerHTML = '';
+            if (currentPages.length === 0) return;
+            const batchBtn = document.createElement('button');
+            batchBtn.className = 'batch-btn';
+            batchBtn.innerHTML = `📦 打包下载全部 (${currentPages.length} 张图片) · ZIP`;
+            batchBtn.addEventListener('click', downloadAllAsZip);
+            batchDownloadContainer.appendChild(batchBtn);
+        }
+
+        // 核心转换: 将 PDF 解析为 PNG 图片列表
+        async function convertPdfToImages(pdfFile) {
+            // 文件大小校验
+            if (pdfFile.size > 50 * 1024 * 1024) {
+                alert('文件超过 50MB 限制，请压缩后再试');
+                return false;
+            }
+            if (pdfFile.type !== 'application/pdf') {
+                alert('请选择一个有效的 PDF 文件');
+                return false;
+            }
+
+            resetUI();          // 清空旧数据
+            loadingArea.style.display = 'block';
+            setProgressText('正在加载PDF结构...');
+
+            try {
+                const arrayBuffer = await pdfFile.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                currentPdfDoc = pdf;
+                const totalPages = pdf.numPages;
+                if (totalPages > 100) {
+                    alert(`当前 PDF 共 ${totalPages} 页，超过100页可能会影响性能，但仍可尝试。建议使用页数较少的文件。`);
+                }
+                totalPagesSpan.innerText = `${totalPages} 页`;
+                
+                const pagesData = [];
+                // 依次渲染每一页
+                for (let i = 1; i <= totalPages; i++) {
+                    setProgressText(`渲染第 ${i} / ${totalPages} 页，生成高清图片...`);
+                    const page = await pdf.getPage(i);
+                    // 使用较高缩放保证文字清晰 (scale = 1.8 兼顾清晰和性能)
+                    const scale = 1.8;
+                    const viewport = page.getViewport({ scale: scale });
+                    
+                    // 创建 canvas
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport,
+                        intent: 'display'
+                    }).promise;
+                    
+                    const imageDataUrl = canvas.toDataURL('image/png');
+                    pagesData.push({
+                        pageNum: i,
+                        imageData: imageDataUrl,
+                        width: Math.round(viewport.width),
+                        height: Math.round(viewport.height)
+                    });
+                }
+                
+                currentPages = pagesData;
+                setProgressText('');
+                loadingArea.style.display = 'none';
+                
+                if (currentPages.length === 0) {
+                    alert('未能提取任何页面，请检查PDF文件');
+                    return false;
+                }
+                
+                // 显示信息栏和画廊
+                pdfInfoBar.style.display = 'block';
+                renderPages();
+                renderBatchButton();
+                return true;
+                
+            } catch (err) {
+                console.error('转换异常:', err);
+                loadingArea.style.display = 'none';
+                alert('PDF 处理失败：' + (err.message || '文件可能损坏或加密，请尝试其他PDF'));
+                return false;
+            }
+        }
+
+        // 上传文件处理
+        function handleFile(file) {
+            if (!file) return;
+            convertPdfToImages(file).catch(e => {
+                console.warn(e);
+                alert('转换出错，请刷新页面重试');
+                loadingArea.style.display = 'none';
+            });
+        }
+
+        // 上传区域点击
+        uploadZone.addEventListener('click', (e) => {
+            if(e.target === uploadZone || uploadZone.contains(e.target)) {
+                fileInput.click();
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // 拖拽上传
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#3b82f6';
+            uploadZone.style.background = '#f0f9ff';
+        });
+        uploadZone.addEventListener('dragleave', (e) => {
+            uploadZone.style.borderColor = '#cbd5e1';
+            uploadZone.style.background = '#fafcff';
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#cbd5e1';
+            uploadZone.style.background = '#fafcff';
+            const dt = e.dataTransfer;
+            if (dt.files && dt.files.length > 0) {
+                const file = dt.files[0];
+                if (file.type === 'application/pdf') {
+                    handleFile(file);
+                } else {
+                    alert('请拖入 PDF 文件');
+                }
+            }
+        });
+
+        // 重置按钮：清空并回到初始状态
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                resetUI();
+                // 额外重置上传区域样式
+                uploadZone.style.borderColor = '#cbd5e1';
+                uploadZone.style.background = '#fafcff';
+                fileInput.value = '';
+                currentPages = [];
+                currentPdfDoc = null;
+            });
+        }
+
+        // 初始时隐藏所有信息栏
+        resetUI();
+    })();
+</script>
+</body>
+</html>

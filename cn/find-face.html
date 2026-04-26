@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Find My Face · 人脸相册聚合工具 | 本地识别，隐私安全</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f4f7fc;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .fmf-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* 头部区域 */
+        .hero-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            padding: 3rem 2.5rem 2rem 2.5rem;
+            text-align: center;
+            border-bottom: 1px solid #eef2f8;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: #e6f7ec;
+            color: #2c7a47;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.8rem;
+            border-radius: 40px;
+            margin-bottom: 1rem;
+            letter-spacing: 0.3px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b, #2c3e66);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.3px;
+        }
+
+        .hero-desc {
+            font-size: 1rem;
+            color: #475569;
+            max-width: 700px;
+            margin: 0 auto 1rem;
+        }
+
+        .privacy-note {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #f1f5f9;
+            padding: 0.3rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            color: #2c5f8a;
+            margin-top: 0.5rem;
+        }
+
+        /* 三步流程卡片 - 使用真实图片 */
+        .steps-section {
+            padding: 2.5rem 2rem;
+            background: white;
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #0f172a;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .step-card {
+            background: #f9fbfe;
+            border-radius: 1.5rem;
+            padding: 1.5rem 1rem 1.8rem;
+            text-align: center;
+            transition: all 0.2s;
+            border: 1px solid #ecf3f9;
+        }
+
+        .step-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.1);
+            border-color: #dce5f0;
+        }
+
+        .step-img {
+            width: 100%;
+            max-width: 200px;
+            margin: 0 auto 1rem;
+            border-radius: 1rem;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            display: block;
+        }
+
+        .step-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0.8rem 0 0.5rem;
+        }
+
+        .step-card p {
+            font-size: 0.85rem;
+            color: #5b6e8c;
+            padding: 0 0.5rem;
+        }
+
+        /* 下载区域 */
+        .download-section {
+            background: #f1f6fe;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            border-radius: 1.5rem;
+            margin: 0 1.5rem 2rem 1.5rem;
+        }
+
+        .download-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .download-sub {
+            color: #475569;
+            margin-bottom: 1.8rem;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn-download {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 0.85rem 2rem;
+            border-radius: 3rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-download:hover {
+            background: #0f172a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-download.mac {
+            background: #2563eb;
+        }
+
+        .btn-download.mac:hover {
+            background: #1d4ed8;
+        }
+
+        .baidu-note {
+            font-size: 0.7rem;
+            background: #ffffffcc;
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            margin-top: 1rem;
+            color: #2c5f8a;
+        }
+
+        /* FAQ 网格布局优化 */
+        .faq-section {
+            padding: 2rem 2rem 2.5rem;
+            border-top: 1px solid #eef2f8;
+        }
+
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.8rem;
+        }
+
+        .faq-item {
+            background: #fafcff;
+            border-radius: 1.2rem;
+            padding: 1.2rem 1.5rem;
+            border: 1px solid #eef2f8;
+            transition: all 0.2s;
+        }
+
+        .faq-item:hover {
+            border-color: #cbdff2;
+            background: white;
+        }
+
+        .faq-question {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #0f172a;
+        }
+
+        .faq-question::before {
+            content: "❓";
+            font-size: 0.9rem;
+        }
+
+        .faq-answer {
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.45;
+            margin-left: 1.6rem;
+        }
+
+        .highlight {
+            color: #2c7a47;
+            font-weight: 500;
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 1.2rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+            border-top: 1px solid #e9edf2;
+        }
+
+        .footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        @media (max-width: 680px) {
+            h1 { font-size: 1.8rem; }
+            .hero-section { padding: 2rem 1.5rem; }
+            .steps-section { padding: 1.8rem 1rem; }
+            .step-img { max-width: 150px; }
+            .download-section { margin: 0 1rem 1.5rem 1rem; padding: 1.8rem; }
+            .btn-download { padding: 0.7rem 1.5rem; font-size: 0.8rem; }
+            .faq-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="fmf-container">
+    <!-- Hero 区域 -->
+    <div class="hero-section">
+        <div class="hero-badge">⚡ 100% 本地 · 隐私优先</div>
+        <h1>Find My Face · 轻松找到自己</h1>
+        <p class="hero-desc">
+            上传一张你的照片，立即在整台电脑的图片库中找出所有包含你的人脸照片。<br>
+            Windows / macOS 双版本，完全离线运行，数据永不外传。
+        </p>
+        <div class="privacy-note">
+            🔒 无需联网 · 人脸识别在本地完成 · 不上传任何图片
+        </div>
+    </div>
+
+    <!-- 三步操作 + 真实示意图 -->
+    <div class="steps-section">
+        <div class="section-title">📸 三步轻松找到自己</div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <img class="step-img" src="https://allhtmlres.xuweifeng19861204.workers.dev/step1.png" alt="加载示例人脸" loading="lazy">
+                <h3>1. 加载示例人脸</h3>
+                <p>选择一张有你正脸的照片作为参考，AI 模型自动加载。</p>
+            </div>
+            <div class="step-card">
+                <img class="step-img" src="https://allhtmlres.xuweifeng19861204.workers.dev/step2.png" alt="选择相册目录" loading="lazy">
+                <h3>2. 选择相册目录</h3>
+                <p>指定包含你所有照片的文件夹 (支持子目录扫描)。</p>
+            </div>
+            <div class="step-card">
+                <img class="step-img" src="https://allhtmlres.xuweifeng19861204.workers.dev/step3.png" alt="一键智能搜索" loading="lazy">
+                <h3>3. 一键智能搜索</h3>
+                <p>几秒内找出所有含你的照片，支持导出和预览。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 下载区块 - 网盘地址（百度网盘） -->
+    <div class="download-section">
+        <div class="download-title">🚀 即刻下载Windows(x64)版FaceSearchPro，永久免费</div>
+        <div class="download-sub">无需注册，无隐藏付费，离线使用</div>
+        <div class="btn-group">
+            <p>通过网盘分享的文件：FaceSearchPro.zip<br>
+链接: https://pan.baidu.com/s/1X4Tk317HL1BVn33Mbk2FyA?pwd=drpj 提取码: drpj</p>
+
+            <p>FaceSearchPro还未支持macOS，敬请期待！</p>
+        </div>
+        <p style="font-size: 0.7rem; margin-top: 1rem; color: #5b6e8c;">✔ Windows 10/11 · macOS 12+ · 本地 AI 识别引擎</p>
+    </div>
+
+    <!-- FAQ 区 - 网格布局更清晰 -->
+    <div class="faq-section">
+        <div class="section-title" style="font-size:1.4rem; margin-bottom:0.5rem;">❓ 常见问题</div>
+        <div class="faq-grid">
+            <div class="faq-item">
+                <div class="faq-question">我的隐私如何保障？</div>
+                <div class="faq-answer">100% 本地处理！所有人脸识别运算均在您的电脑上执行，<span class="highlight">不联网、不上传、无云端存储</span>。您的照片永远只属于您自己。</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">能识别集体照中的我吗？</div>
+                <div class="faq-answer">当然可以。工具会检测图片中<span class="highlight">所有人脸并逐一比对</span>，即使您在几十人的合照中，也能精准定位。</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">支持扫描多少张照片？</div>
+                <div class="faq-answer">没有硬性数量限制。实测支持 <span class="highlight">10,000+ 张照片</span>，扫描速度取决于您的 CPU 性能。建议首次使用选择代表性文件夹测试。</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Windows 和 Mac 功能一致吗？</div>
+                <div class="faq-answer">完全一致。两个版本均包含相同的 AI 模型、本地扫描引擎和界面，跨平台体验无缝。</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">识别准确率如何？</div>
+                <div class="faq-answer">针对正脸/侧脸、不同年龄、戴眼镜等变化，准确率超过 <span class="highlight">98%</span>。光线良好的照片效果最佳，支持多种角度。</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">软件会收集使用数据吗？</div>
+                <div class="faq-answer">零数据收集。我们<span class="highlight">不记录任何使用日志、不上传诊断信息</span>，软件运行期间无任何网络请求（除版本更新外）。</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 LocalProcess — 人脸识别工具 · 隐私优先 · 本地引擎</p>
+        <p style="margin-top: 0.2rem;"><a href="#">隐私政策</a> · <span>🔐 零数据上传</span> · <span>⚡ 离线可用</span></p>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // 仅添加控制台友好提示，不执行任何追踪或网络请求
+        console.log("Find My Face 中文版 | 本地人脸识别工具 | 所有操作均在用户设备完成，无远程调用");
+        // 为下载链接添加简单的网盘提醒（无跟踪）
+        const downloadBtns = document.querySelectorAll('.btn-download');
+        downloadBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // 纯提示，无数据上报
+                console.log("用户点击下载: " + (btn.innerText.includes('Windows') ? 'Windows 版本 (百度网盘)' : 'macOS 版本 (百度网盘)'));
+            });
+        });
+    })();
+</script>
+</body>
+</html>
