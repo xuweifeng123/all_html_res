@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Batch Watermark Tool - Add Watermark to Images | 100% Local</title>
+    <title>图片批量添加水印 - 给JPG、PNG添加水印 | 100%本地处理 | 无需上传服务器</title>
+    <meta name="description" content="免费在线为多张图片批量添加文字或图片水印。支持自定义文字、Logo、透明度、拖拽定位。100%本地处理 - 不上传，不存储，保护隐私。">
     <style>
         * {
             margin: 0;
@@ -197,7 +198,7 @@
 
         .watermark-overlay {
             position: absolute;
-            background: rgba(0,0,0,0.05);
+            background: rgba(52,152,219,0.2);
             border: 2px dashed #3498db;
             border-radius: 4px;
             cursor: move;
@@ -414,38 +415,38 @@
 </head>
 <body>
 <div class="container">
-    <h1>Batch Watermark Tool <span class="badge">100% Local</span></h1>
-    <p class="subtitle">Add text or image watermarks to multiple images. Drag to position the watermark. All processing happens in your browser - no upload.</p>
+    <h1>批量水印工具 <span class="badge">100% 本地处理</span></h1>
+    <p class="subtitle">为多张图片批量添加文字或图片水印，支持拖拽定位水印位置。所有处理均在浏览器中完成 - 不上传，无存储。</p>
 
     <div class="two-columns">
         <!-- 左侧设置面板 -->
         <div class="settings-panel">
-            <h3 style="margin-bottom: 20px;">⚙️ Watermark Settings</h3>
+            <h3 style="margin-bottom: 20px;">⚙️ 水印设置</h3>
 
             <!-- 水印类型 -->
             <div class="form-group">
-                <label>Watermark Type</label>
+                <label>水印类型</label>
                 <div class="radio-group">
-                    <label><input type="radio" name="type" value="text" checked> 📝 Text Watermark</label>
-                    <label><input type="radio" name="type" value="image"> 🖼️ Image Watermark</label>
+                    <label><input type="radio" name="type" value="text" checked> 📝 文字</label>
+                    <label><input type="radio" name="type" value="image"> 🖼️ 图片</label>
                 </div>
             </div>
 
             <!-- 文字水印设置 -->
             <div id="text-settings">
                 <div class="form-group">
-                    <label>Text</label>
-                    <input type="text" id="watermark-text" value="© YourWebsite.com" placeholder="Enter watermark text">
+                    <label>水印文字</label>
+                    <input type="text" id="watermark-text" value="© YourWebsite.com" placeholder="输入水印文字">
                 </div>
                 <div class="form-group">
-                    <label>Font Size</label>
+                    <label>字体大小</label>
                     <div class="slider-row">
                         <input type="range" id="font-size" min="12" max="100" value="40">
                         <span id="font-size-value">40px</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Font Color</label>
+                    <label>字体颜色</label>
                     <div class="color-presets" id="color-presets">
                         <div class="color-preset" style="background: #ffffff;" data-color="#ffffff"></div>
                         <div class="color-preset" style="background: #000000;" data-color="#000000"></div>
@@ -456,9 +457,9 @@
                         <div class="color-preset" style="background: #9b59b6;" data-color="#9b59b6"></div>
                     </div>
                     <div class="custom-color-row">
-                        <span>Custom:</span>
+                        <span>自定义：</span>
                         <input type="color" id="custom-color" value="#ffffff">
-                        <span id="current-color-label">Current: White</span>
+                        <span id="current-color-label">当前：白色</span>
                     </div>
                 </div>
             </div>
@@ -466,14 +467,14 @@
             <!-- 图片水印设置 -->
             <div id="image-settings" style="display: none;">
                 <div class="form-group">
-                    <label>Watermark Image (PNG with transparency recommended)</label>
+                    <label>水印图片 (推荐使用透明背景 PNG)</label>
                     <input type="file" id="watermark-image" accept="image/png,image/jpeg,image/webp">
                     <div id="watermark-preview" style="margin-top: 10px; display: none;">
                         <img id="watermark-preview-img" style="max-width: 80px; max-height: 80px;">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Watermark Scale</label>
+                    <label>水印缩放比例</label>
                     <div class="slider-row">
                         <input type="range" id="watermark-scale" min="10" max="40" value="15">
                         <span id="scale-value">15%</span>
@@ -483,7 +484,7 @@
 
             <!-- 通用设置 -->
             <div class="form-group">
-                <label>Opacity</label>
+                <label>不透明度</label>
                 <div class="slider-row">
                     <input type="range" id="opacity" min="0" max="100" value="70">
                     <span id="opacity-value">70%</span>
@@ -491,7 +492,7 @@
             </div>
 
             <div class="form-group">
-                <label>💡 Tip: Drag the watermark on the preview to position it</label>
+                <label>💡 提示：在右侧预览图上拖拽蓝色方框可调整水印位置</label>
             </div>
         </div>
 
@@ -503,7 +504,7 @@
                     <canvas id="preview-canvas" class="preview-image" style="max-width: 100%; height: auto;"></canvas>
                     <div id="drag-overlay" class="watermark-overlay" style="position: absolute; display: none; cursor: move;"></div>
                 </div>
-                <div class="drag-hint">✨ Click and drag the blue box to position the watermark</div>
+                <div class="drag-hint">✨ 点击并拖拽蓝色方框，即可调整水印位置</div>
             </div>
 
             <!-- 上传区域 -->
@@ -512,51 +513,51 @@
                     <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 21h14"/>
                     <rect x="4" y="14" width="16" height="4" rx="1"/>
                 </svg>
-                <p>Click or drag & drop images here</p>
-                <p style="font-size: 12px; color: #999;">Supports JPG, PNG, WebP | Multiple images</p>
+                <p>点击或拖拽图片至此区域</p>
+                <p style="font-size: 12px; color: #999;">支持 JPG、PNG、WebP | 可批量上传多张图片</p>
                 <input type="file" id="file-input" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display: none;">
             </div>
 
             <!-- 图片列表 -->
             <div id="images-list" style="display: none;">
                 <div class="stats-bar">
-                    <span>📸 Images: <strong id="image-count">0</strong></span>
-                    <span>✅ Watermarked: <strong id="watermarked-count">0</strong></span>
+                    <span>📸 图片总数：<strong id="image-count">0</strong></span>
+                    <span>✅ 已加水印：<strong id="watermarked-count">0</strong></span>
                 </div>
                 <div id="image-list-container" class="image-list"></div>
-                <button class="btn-primary" id="apply-all-btn">🎨 Apply Watermark to All Images</button>
-                <button class="btn-secondary" id="download-all-btn" style="display: none;">📦 Download All as ZIP</button>
+                <button class="btn-primary" id="apply-all-btn">🎨 为全部图片添加水印</button>
+                <button class="btn-secondary" id="download-all-btn" style="display: none;">📦 打包下载全部 (ZIP)</button>
             </div>
         </div>
     </div>
 
     <!-- FAQ 区域 -->
     <div class="faq-section">
-        <h3>❓ Frequently Asked Questions</h3>
+        <h3>❓ 常见问题</h3>
         <div class="faq-grid">
             <div class="faq-item">
-                <h4>How do I position the watermark?</h4>
-                <p>Simply <span class="highlight">click and drag the blue box</span> on the preview image. The watermark will be placed exactly where you drag it.</p>
+                <h4>如何调整水印位置？</h4>
+                <p>在预览图上<span class="highlight">点击并拖拽蓝色方框</span>，即可将水印拖动到任意位置。所有图片将使用相同的位置。</p>
             </div>
             <div class="faq-item">
-                <h4>Can I batch process multiple images?</h4>
-                <p>Yes! Upload multiple images, set your watermark once, then click "Apply Watermark to All Images". All images will get the same watermark at the same position.</p>
+                <h4>可以批量处理多张图片吗？</h4>
+                <p>可以！一次上传多张图片，设置好水印后点击<span class="highlight">“为全部图片添加水印”</span>，所有图片将使用相同的水印设置。</p>
             </div>
             <div class="faq-item">
-                <h4>How do I download all watermarked images?</h4>
-                <p>After applying watermarks, click <span class="highlight">"Download All as ZIP"</span> to download all watermarked images in a single ZIP file.</p>
+                <h4>如何下载所有已加水印的图片？</h4>
+                <p>添加水印完成后，点击<span class="highlight">“打包下载全部 (ZIP)”</span>，即可将所有图片一次性打包下载。</p>
             </div>
             <div class="faq-item">
-                <h4>Are my images uploaded to a server?</h4>
-                <p>No, absolutely not. All processing happens <span class="highlight">100% locally in your browser</span> using Canvas API.</p>
+                <h4>图片会被上传到服务器吗？</h4>
+                <p>绝对不会！所有处理<span class="highlight">100% 在您的浏览器本地完成</span>，使用 Canvas API 绘制水印，图片永不离开您的设备。</p>
             </div>
             <div class="faq-item">
-                <h4>What formats are supported?</h4>
-                <p>Input: <span class="highlight">JPG, PNG, WebP</span>. Output: PNG (with transparency preserved).</p>
+                <h4>支持哪些图片格式？</h4>
+                <p>输入格式：<span class="highlight">JPG、PNG、WebP</span>。输出格式：PNG（保留透明通道）。</p>
             </div>
             <div class="faq-item">
-                <h4>Can I remove existing watermarks?</h4>
-                <p>No. Removing watermarks requires restoring lost pixel data, which is <span class="highlight">technically impossible</span> to do perfectly.</p>
+                <h4>可以去除已有水印吗？</h4>
+                <p>不可以。去除水印需要恢复丢失的像素数据，这在技术上<span class="highlight">几乎不可能完美实现</span>。</p>
             </div>
         </div>
     </div>
@@ -602,7 +603,6 @@
     let currentType = 'text';
     let currentFontColor = '#ffffff';
     let watermarkImageObj = null;
-    let watermarkImageData = null;
     let dragPosition = { x: 50, y: 50 }; // 百分比位置
     let previewImageElement = null;
     let previewImageWidth = 0, previewImageHeight = 0;
@@ -632,8 +632,8 @@
     }
 
     function updateCurrentColorLabel() {
-        const colorNames = { '#ffffff': 'White', '#000000': 'Black', '#e74c3c': 'Red', '#3498db': 'Blue', '#27ae60': 'Green', '#f39c12': 'Orange', '#9b59b6': 'Purple' };
-        currentColorLabel.textContent = `Current: ${colorNames[currentFontColor] || 'Custom'}`;
+        const colorNames = { '#ffffff': '白色', '#000000': '黑色', '#e74c3c': '红色', '#3498db': '蓝色', '#27ae60': '绿色', '#f39c12': '橙色', '#9b59b6': '紫色' };
+        currentColorLabel.textContent = `当前：${colorNames[currentFontColor] || '自定义'}`;
     }
 
     // 类型切换
@@ -715,7 +715,7 @@
         ctx.globalAlpha = opacityVal;
 
         if (isTextMode) {
-            const text = watermarkText.value || 'Watermark';
+            const text = watermarkText.value || '水印';
             const fontSizeVal = parseInt(fontSize.value);
             ctx.font = `${fontSizeVal}px "Microsoft Yahei", "PingFang SC", "Helvetica Neue", Arial`;
             ctx.fillStyle = currentFontColor;
@@ -746,11 +746,7 @@
         previewCtx.drawImage(canvas, 0, 0);
 
         // 更新拖拽框位置
-        const containerRect = previewContainer.getBoundingClientRect();
         const canvasRect = previewCanvas.getBoundingClientRect();
-        const scaleX = canvasRect.width / previewImageWidth;
-        const scaleY = canvasRect.height / previewImageHeight;
-        
         const boxWidth = 60;
         const boxHeight = 40;
         const boxLeft = (dragPosition.x / 100) * canvasRect.width - boxWidth / 2;
@@ -777,14 +773,14 @@
         uploadArea.style.borderColor = '#ccc';
         const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
         if (files.length > 0) await addImages(files);
-        else alert('Please upload valid image files');
+        else alert('请上传有效的图片文件');
     });
     fileInput.addEventListener('change', async (e) => { if (e.target.files.length > 0) await addImages(Array.from(e.target.files)); fileInput.value = ''; });
 
     async function addImages(files) {
-        if (originalImages.length + files.length > 20) { alert('Maximum 20 images allowed'); return; }
+        if (originalImages.length + files.length > 20) { alert('最多支持 20 张图片'); return; }
         for (const file of files) {
-            if (file.size > 20 * 1024 * 1024) { alert(`Image "${file.name}" exceeds 20MB limit`); continue; }
+            if (file.size > 20 * 1024 * 1024) { alert(`图片 "${file.name}" 超过 20MB 限制`); continue; }
             try {
                 const url = URL.createObjectURL(file);
                 const img = await loadImage(url);
@@ -798,7 +794,7 @@
                     width: img.width,
                     height: img.height
                 });
-            } catch (error) { console.error(error); alert(`Failed to load "${file.name}"`); }
+            } catch (error) { console.error(error); alert(`加载 "${file.name}" 失败`); }
         }
         renderImageList();
         if (originalImages.length > 0 && !previewImageElement) {
@@ -826,8 +822,8 @@
                     <div class="image-name">${escapeHtml(img.name)}</div>
                     <div>${formatFileSize(img.size)} • ${img.width}x${img.height}</div>
                 </div>
-                ${isWatermarked ? '<span class="watermarked-badge">✓ Watermarked</span>' : ''}
-                <button class="remove-img" data-id="${img.id}">Remove</button>
+                ${isWatermarked ? '<span class="watermarked-badge">✓ 已添加水印</span>' : ''}
+                <button class="remove-img" data-id="${img.id}">移除</button>
             `;
             imageListContainer.appendChild(div);
         });
@@ -862,14 +858,14 @@
 
     // ==================== 批量处理 ====================
     async function applyToAll() {
-        if (originalImages.length === 0) { alert('Please add images first'); return; }
+        if (originalImages.length === 0) { alert('请先添加图片'); return; }
         applyAllBtn.disabled = true;
-        applyAllBtn.textContent = '⏳ Processing...';
+        applyAllBtn.textContent = '⏳ 处理中...';
         
         watermarkedImages = [];
         for (let i = 0; i < originalImages.length; i++) {
             const img = originalImages[i];
-            applyAllBtn.textContent = `Processing ${i + 1}/${originalImages.length}...`;
+            applyAllBtn.textContent = `处理中 ${i + 1}/${originalImages.length}...`;
             const canvas = await applyWatermarkToImage(img.img, img.width, img.height);
             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
             const url = URL.createObjectURL(blob);
@@ -885,16 +881,16 @@
         
         renderImageList();
         applyAllBtn.disabled = false;
-        applyAllBtn.textContent = '🎨 Apply Watermark to All Images';
-        alert(`Successfully watermarked ${watermarkedImages.length} images!`);
+        applyAllBtn.textContent = '🎨 为全部图片添加水印';
+        alert(`成功为 ${watermarkedImages.length} 张图片添加水印！`);
     }
 
     // ==================== 打包下载 ZIP ====================
     async function downloadAllAsZip() {
-        if (watermarkedImages.length === 0) { alert('No watermarked images to download. Please apply watermark first.'); return; }
+        if (watermarkedImages.length === 0) { alert('没有已添加水印的图片，请先添加水印'); return; }
         
         downloadAllBtn.disabled = true;
-        downloadAllBtn.textContent = '⏳ Creating ZIP...';
+        downloadAllBtn.textContent = '⏳ 正在打包...';
         
         const zip = new JSZip();
         const folder = zip.folder('watermarked_images');
@@ -903,15 +899,15 @@
             folder.file(img.name, img.blob);
         }
         
-        const readme = `Watermarked Images Export
+        const readme = `水印图片导出
 ========================
-Date: ${new Date().toLocaleString()}
-Total images: ${watermarkedImages.length}
-Watermark type: ${currentType === 'text' ? 'Text' : 'Image'}
-${currentType === 'text' ? `Watermark text: ${watermarkText.value}` : ''}
-Opacity: ${opacity.value}%
+生成时间: ${new Date().toLocaleString()}
+图片总数: ${watermarkedImages.length}
+水印类型: ${currentType === 'text' ? '文字' : '图片'}
+${currentType === 'text' ? `水印文字: ${watermarkText.value}` : ''}
+不透明度: ${opacity.value}%
 `;
-        folder.file("README.txt", readme);
+        folder.file("说明.txt", readme);
         
         const content = await zip.generateAsync({ type: 'blob' });
         const link = document.createElement('a');
@@ -924,7 +920,7 @@ Opacity: ${opacity.value}%
         URL.revokeObjectURL(url);
         
         downloadAllBtn.disabled = false;
-        downloadAllBtn.textContent = '📦 Download All as ZIP';
+        downloadAllBtn.textContent = '📦 打包下载全部 (ZIP)';
     }
 
     // ==================== 工具函数 ====================
