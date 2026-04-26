@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>PDF转图片工具 - 本地转换，隐私安全 | 在线PDF转JPG | PDF 转PNG</title>
-    <meta name="description" content="免费在线将 PDF 文件转换为 PNG 或 JPG 图片。支持提取所有页面为单独图片，可单张下载或批量打包为 ZIP。所有转换均在浏览器本地完成，不上传服务器，不存储任何数据。100% 保护隐私的 PDF 转图片工具，无需注册。">
+    <title>PDF转图片工具 - 100%本地转换 | 本地转换，隐私安全 | 在线PDF转JPG | PDF 转PNG</title>
+    <meta name="description" content="免费在线将PDF转换为PNG或JPG图片，100%本地处理。无需上传，无服务器存储 - 所有转换均在您的浏览器中完成。免费、私密、安全的PDF转图片工具。">
     <style>
         * {
             margin: 0;
@@ -20,7 +20,6 @@
             color: #1e293b;
         }
 
-        /* 主容器 */
         .pdf-to-image-container {
             max-width: 1100px;
             margin: 0 auto;
@@ -30,7 +29,6 @@
             padding: 1.5rem 2rem;
         }
 
-        /* 响应式内边距 */
         @media (max-width: 640px) {
             .pdf-to-image-container {
                 padding: 1.25rem;
@@ -153,27 +151,38 @@
         }
 
         /* 批量下载按钮 */
+        .batch-buttons {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
         .batch-btn {
             background: #27ae60;
             color: white;
             border: none;
-            padding: 0.6rem 1.4rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 2rem;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: 0.2s;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .batch-btn.jpg-btn {
+            background: #f39c12;
+        }
+        .batch-btn.jpg-btn:hover {
+            background: #e67e22;
         }
         .batch-btn:hover {
             background: #1f8f4e;
             transform: translateY(-1px);
         }
 
-        /* 页面网格 (更现代紧凑) */
+        /* 页面网格 */
         .pages-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.25rem;
             margin-top: 1.2rem;
         }
@@ -218,15 +227,17 @@
             color: #5b6e8c;
             margin-bottom: 0.8rem;
         }
+        .download-buttons-group {
+            display: flex;
+            gap: 0.5rem;
+        }
         .download-page-btn {
-            background: #3b82f6;
+            flex: 1;
             border: none;
-            width: 100%;
             padding: 0.5rem;
             border-radius: 2rem;
             font-size: 0.75rem;
             font-weight: 600;
-            color: white;
             cursor: pointer;
             transition: background 0.2s;
             display: flex;
@@ -234,11 +245,22 @@
             justify-content: center;
             gap: 6px;
         }
-        .download-page-btn:hover {
-            background: #2563eb;
+        .download-png {
+            background: #27ae60;
+            color: white;
+        }
+        .download-png:hover {
+            background: #1f8f4e;
+        }
+        .download-jpg {
+            background: #f39c12;
+            color: white;
+        }
+        .download-jpg:hover {
+            background: #e67e22;
         }
 
-        /* FAQ 区块 */
+        /* FAQ 区域 */
         .faq-section {
             margin-top: 2.5rem;
             background: #f9fbfe;
@@ -283,7 +305,6 @@
             font-family: inherit;
         }
     </style>
-    <!-- PDF.js 和 JSZip CDN (完全本地运算，仅加载库文件) -->
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.6.347/build/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
@@ -291,7 +312,7 @@
 <div class="pdf-to-image-container">
     <h2>📄 PDF 转图片工具</h2>
     <div class="subhead">
-        完全本地转换 · 不上传服务器 · 支持 PNG/批量打包ZIP
+        100% 本地处理 · 无需上传 · 支持 PNG / JPG · 一键打包 ZIP 下载
     </div>
 
     <!-- 上传区域 -->
@@ -302,16 +323,16 @@
                 <rect x="4" y="14" width="16" height="4" rx="1" stroke="currentColor"/>
             </svg>
         </div>
-        <p>点击或拖拽 PDF 文件至此区域</p>
+        <p>点击或拖拽 PDF 文件至此</p>
         <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
-        <div class="file-hint">最大文件 50MB · 支持多页PDF · 隐私优先</div>
+        <div class="file-hint">最大文件 50MB · 支持多页 PDF · 隐私优先</div>
     </div>
 
     <!-- 加载状态 -->
     <div id="loadingArea" style="display: none;">
         <div class="loading-overlay">
             <div class="spinner"></div>
-            <p style="color: #2c3e66; font-weight: 500;">🔄 正在解析PDF，请稍候...</p>
+            <p style="color: #2c3e66; font-weight: 500;">🔄 正在处理 PDF，请稍候...</p>
             <p id="pageProgressMsg" style="font-size: 0.8rem; color: #5b6e8c; margin-top: 6px;"></p>
         </div>
     </div>
@@ -321,47 +342,47 @@
         <div class="pdf-info-card">
             <div class="pdf-stats">
                 <span class="total-badge" id="totalPagesSpan">0 页</span>
-                <span style="font-size: 0.8rem; color:#475569;">✅ 转换完成，图片均在浏览器中生成</span>
+                <span style="font-size: 0.8rem; color:#475569;">✅ 本地转换完成</span>
             </div>
             <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
-                <div id="batchDownloadContainer"></div>
-                <button id="resetUploadBtn" class="reset-upload-btn">🔄 重新上传</button>
+                <div id="batchDownloadContainer" class="batch-buttons"></div>
+                <button id="resetUploadBtn" class="reset-upload-btn">🔄 新文件</button>
             </div>
         </div>
     </div>
 
-    <!-- 页面缩略图列表区域 -->
+    <!-- 页面预览网格 -->
     <div id="pagesGallery" style="display: none; margin-top: 1rem;">
-        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">📸 页面预览 (点击下载单张)</h3>
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">📸 页面预览（点击下载）</h3>
         <div id="pagesGrid" class="pages-grid"></div>
     </div>
 
-    <!-- FAQ 区块 (本地化中文内容) -->
+    <!-- FAQ 区域 -->
     <div class="faq-section">
         <h2>❓ 常见问题</h2>
         <div class="faq-item">
-            <h3>我可以免费将 PDF 转换为 JPG 或 PNG 吗？</h3>
-            <p>是的，本工具完全免费，无需注册。支持 PNG 无损格式，也支持保存为高质量图片，所有功能本地运行。</p>
+            <h3>可以免费将 PDF 转换为 JPG 或 PNG 吗？</h3>
+            <p>是的，本工具完全免费。您可以将 PDF 转换为 PNG（无损画质）或 JPG（压缩体积），无需任何费用或注册。</p>
         </div>
         <div class="faq-item">
             <h3>这个工具支持 PDF 转 PNG 还是 JPG？</h3>
-            <p>目前提供 PNG 格式（无损画质），您也可以后续通过其他工具转为 JPG。所有图片均基于原始清晰度渲染。</p>
+            <p>两种格式都支持。您可以将每一页分别下载为 PNG（最佳画质）或 JPG（更小文件），也支持批量打包为 ZIP 下载。</p>
         </div>
         <div class="faq-item">
-            <h3>在线转换 PDF 安全吗？文件会上传吗？</h3>
-            <p>绝对安全！与常规在线转换器不同，您的 PDF 文件完全不会离开您的设备。所有渲染和图片生成均在浏览器内完成，无服务器上传，保护隐私。</p>
+            <h3>在线转换 PDF 安全吗？会泄露隐私吗？</h3>
+            <p>绝对安全！与其他 PDF 转图片工具不同，我们<span class="highlight" style="background:#f0f7ff;padding:0 4px;">不上传您的文件到任何服务器</span>。所有转换均在您的浏览器本地完成，确保文档隐私和安全。</p>
         </div>
         <div class="faq-item">
             <h3>最多可以转换多少页？</h3>
-            <p>单次支持最高 100 页的 PDF 文件，每页都会生成高清预览图，并且可以一键打包下载 ZIP 压缩包。</p>
+            <p>支持转换最多 100 页的 PDF 文件，工具会提取每一页并保存为单独的图片。</p>
         </div>
         <div class="faq-item">
-            <h3>可以从 PDF 中提取内嵌图片吗？</h3>
-            <p>本工具会将每一页渲染为完整图片，适合提取页面截图、图表、扫描件等。若要提取原始图片资源，建议使用专业提取工具，但本功能对常规需求足够强大。</p>
+            <h3>可以从 PDF 中提取图片吗？</h3>
+            <p>当然可以！本工具会将 PDF 的每一页渲染为图片，非常适合提取文档中的插图、图表或扫描件。</p>
         </div>
     </div>
     <footer>
-        🔒 本地处理 · 零数据上传 · 转换后文件仅存在于您的浏览器中
+        🔒 100% 本地处理 · 零数据上传 · 文件永不离开您的设备
     </footer>
 </div>
 
@@ -379,73 +400,47 @@
         const resetBtn = document.getElementById('resetUploadBtn');
         const pageProgressMsg = document.getElementById('pageProgressMsg');
 
-        // 全局存储页面数据
-        let currentPages = [];      // 存放 { pageNum, imageData, width, height }
-        let currentPdfDoc = null;
+        // 存储页面数据
+        let currentPages = [];      // { pageNum, pngDataUrl, jpgBlob, width, height }
 
-        // 配置 PDF.js worker (使用CDN worker)
+        // 配置 PDF.js worker
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.6.347/build/pdf.worker.min.js';
 
-        // 重置/清空界面
+        // 辅助：Canvas 转 JPG Blob
+        function canvasToJPGBlob(canvas, quality = 0.85) {
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    resolve(blob);
+                }, 'image/jpeg', quality);
+            });
+        }
+
+        // 辅助：Canvas 转 PNG DataURL
+        function canvasToPNGDataURL(canvas) {
+            return canvas.toDataURL('image/png');
+        }
+
+        // 重置界面
         function resetUI() {
+            for (const page of currentPages) {
+                if (page.jpgUrl) URL.revokeObjectURL(page.jpgUrl);
+            }
             currentPages = [];
-            currentPdfDoc = null;
             pagesGrid.innerHTML = '';
             batchDownloadContainer.innerHTML = '';
             pdfInfoBar.style.display = 'none';
             pagesGallery.style.display = 'none';
             loadingArea.style.display = 'none';
-            fileInput.value = '';   // 清除选中的文件
-            if(pageProgressMsg) pageProgressMsg.innerText = '';
+            fileInput.value = '';
+            if (pageProgressMsg) pageProgressMsg.innerText = '';
         }
 
-        // 显示加载进度文字
         function setProgressText(text) {
-            if(pageProgressMsg) pageProgressMsg.innerText = text;
+            if (pageProgressMsg) pageProgressMsg.innerText = text;
         }
 
-        // 渲染页面列表 (卡片风格)
-        function renderPages() {
-            if (!currentPages.length) return;
-            pagesGrid.innerHTML = '';
-            for (let pg of currentPages) {
-                const card = document.createElement('div');
-                card.className = 'page-card';
-
-                // 预览区
-                const previewDiv = document.createElement('div');
-                previewDiv.className = 'preview-img';
-                const img = document.createElement('img');
-                img.src = pg.imageData;
-                img.alt = `第 ${pg.pageNum} 页`;
-                img.loading = 'lazy';
-                previewDiv.appendChild(img);
-
-                // 信息区
-                const metaDiv = document.createElement('div');
-                metaDiv.className = 'page-meta';
-                metaDiv.innerHTML = `
-                    <div class="page-title">📄 第 ${pg.pageNum} 页</div>
-                    <div class="page-dim">${pg.width} x ${pg.height} px · PNG</div>
-                `;
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'download-page-btn';
-                downloadBtn.innerHTML = '⬇️ 下载此页 (PNG)';
-                downloadBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    downloadSingleImage(pg.imageData, `pdf_page_${pg.pageNum}.png`);
-                });
-                metaDiv.appendChild(downloadBtn);
-
-                card.appendChild(previewDiv);
-                card.appendChild(metaDiv);
-                pagesGrid.appendChild(card);
-            }
-            pagesGallery.style.display = 'block';
-        }
-
-        // 单张下载
-        function downloadSingleImage(dataUrl, filename) {
+        // 下载单张图片（PNG）
+        function downloadPNG(dataUrl, filename) {
             const link = document.createElement('a');
             link.download = filename;
             link.href = dataUrl;
@@ -454,152 +449,236 @@
             document.body.removeChild(link);
         }
 
-        // 批量打包 ZIP
-        async function downloadAllAsZip() {
+        // 下载单张图片（JPG）
+        function downloadJPG(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 批量下载为 ZIP（可选择格式）
+        async function downloadBatchAsZip(format) {
             if (!currentPages.length) {
-                alert('没有可下载的图片，请先转换PDF。');
+                alert('没有可下载的图片，请先转换 PDF。');
                 return;
             }
-            try {
-                const JSZip = window.JSZip;
-                const zip = new JSZip();
-                const folder = zip.folder("pdf_to_png");
+            const JSZip = window.JSZip;
+            const zip = new JSZip();
+            const folderName = format === 'png' ? 'pdf_png_images' : 'pdf_jpg_images';
+            const folder = zip.folder(folderName);
+            const extension = format;
 
-                for (const page of currentPages) {
-                    // 从 base64 dataURL 提取二进制
-                    const base64Data = page.imageData.split(',')[1];
+            for (const page of currentPages) {
+                if (format === 'png') {
+                    const base64Data = page.pngDataUrl.split(',')[1];
                     const binaryStr = atob(base64Data);
-                    const len = binaryStr.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
+                    const bytes = new Uint8Array(binaryStr.length);
+                    for (let i = 0; i < binaryStr.length; i++) {
                         bytes[i] = binaryStr.charCodeAt(i);
                     }
                     folder.file(`page_${page.pageNum}.png`, bytes);
+                } else {
+                    // JPG 格式
+                    const arrayBuffer = await page.jpgBlob.arrayBuffer();
+                    folder.file(`page_${page.pageNum}.jpg`, new Uint8Array(arrayBuffer));
                 }
-                // 添加说明文件
-                const readmeContent = `PDF转PNG记录\n生成时间: ${new Date().toLocaleString()}\n总页数: ${currentPages.length}\n所有图片均为高质量PNG格式。\n本文件由本地工具生成，无任何上传记录。`;
-                folder.file("转换说明.txt", readmeContent);
-
-                const zipBlob = await zip.generateAsync({ type: 'blob' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(zipBlob);
-                link.download = `pdf_pages_${currentPages.length}页.zip`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(link.href);
-            } catch (err) {
-                console.error('ZIP生成失败:', err);
-                alert('打包失败，可尝试单张下载。');
             }
+
+            const readme = `PDF 转 ${extension.toUpperCase()} 报告
+================================
+原始 PDF 页数: ${currentPages.length}
+转换时间: ${new Date().toLocaleString()}
+输出格式: ${extension.toUpperCase()}
+质量: 高
+
+包含文件:
+${currentPages.map(p => `- page_${p.pageNum}.${extension} (${p.width}x${p.height}px)`).join('\n')}
+`;
+            folder.file("说明.txt", readme);
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(zipBlob);
+            link.download = `pdf_${extension}_images_${currentPages.length}pages.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        // 渲染页面卡片（带 PNG / JPG 下载按钮）
+        function renderPages() {
+            if (!currentPages.length) return;
+            pagesGrid.innerHTML = '';
+            for (const pg of currentPages) {
+                const card = document.createElement('div');
+                card.className = 'page-card';
+
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'preview-img';
+                const img = document.createElement('img');
+                img.src = pg.pngDataUrl;
+                img.alt = `第 ${pg.pageNum} 页`;
+                img.loading = 'lazy';
+                previewDiv.appendChild(img);
+
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'page-meta';
+                metaDiv.innerHTML = `
+                    <div class="page-title">📄 第 ${pg.pageNum} 页</div>
+                    <div class="page-dim">${pg.width} x ${pg.height} px · PNG / JPG</div>
+                `;
+
+                const btnGroup = document.createElement('div');
+                btnGroup.className = 'download-buttons-group';
+
+                const pngBtn = document.createElement('button');
+                pngBtn.className = 'download-page-btn download-png';
+                pngBtn.innerHTML = '⬇️ PNG';
+                pngBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    downloadPNG(pg.pngDataUrl, `page_${pg.pageNum}.png`);
+                });
+
+                const jpgBtn = document.createElement('button');
+                jpgBtn.className = 'download-page-btn download-jpg';
+                jpgBtn.innerHTML = '⬇️ JPG';
+                jpgBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    downloadJPG(pg.jpgBlob, `page_${pg.pageNum}.jpg`);
+                });
+
+                btnGroup.appendChild(pngBtn);
+                btnGroup.appendChild(jpgBtn);
+                metaDiv.appendChild(btnGroup);
+
+                card.appendChild(previewDiv);
+                card.appendChild(metaDiv);
+                pagesGrid.appendChild(card);
+            }
+            pagesGallery.style.display = 'block';
         }
 
         // 渲染批量下载按钮
-        function renderBatchButton() {
+        function renderBatchButtons() {
             batchDownloadContainer.innerHTML = '';
             if (currentPages.length === 0) return;
-            const batchBtn = document.createElement('button');
-            batchBtn.className = 'batch-btn';
-            batchBtn.innerHTML = `📦 打包下载全部 (${currentPages.length} 张图片) · ZIP`;
-            batchBtn.addEventListener('click', downloadAllAsZip);
-            batchDownloadContainer.appendChild(batchBtn);
+
+            const pngBatchBtn = document.createElement('button');
+            pngBatchBtn.className = 'batch-btn';
+            pngBatchBtn.innerHTML = `📦 全部下载为 PNG (ZIP)`;
+            pngBatchBtn.addEventListener('click', () => downloadBatchAsZip('png'));
+
+            const jpgBatchBtn = document.createElement('button');
+            jpgBatchBtn.className = 'batch-btn jpg-btn';
+            jpgBatchBtn.innerHTML = `📦 全部下载为 JPG (ZIP)`;
+            jpgBatchBtn.addEventListener('click', () => downloadBatchAsZip('jpg'));
+
+            batchDownloadContainer.appendChild(pngBatchBtn);
+            batchDownloadContainer.appendChild(jpgBatchBtn);
         }
 
-        // 核心转换: 将 PDF 解析为 PNG 图片列表
+        // 核心转换：PDF 转图片（PNG + JPG）
         async function convertPdfToImages(pdfFile) {
-            // 文件大小校验
             if (pdfFile.size > 50 * 1024 * 1024) {
-                alert('文件超过 50MB 限制，请压缩后再试');
+                alert('文件超过 50MB 限制，请选择较小的文件。');
                 return false;
             }
             if (pdfFile.type !== 'application/pdf') {
-                alert('请选择一个有效的 PDF 文件');
+                alert('请选择一个有效的 PDF 文件。');
                 return false;
             }
 
-            resetUI();          // 清空旧数据
+            resetUI();
             loadingArea.style.display = 'block';
-            setProgressText('正在加载PDF结构...');
+            setProgressText('正在加载 PDF 文档...');
 
             try {
                 const arrayBuffer = await pdfFile.arrayBuffer();
                 const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                currentPdfDoc = pdf;
                 const totalPages = pdf.numPages;
                 if (totalPages > 100) {
-                    alert(`当前 PDF 共 ${totalPages} 页，超过100页可能会影响性能，但仍可尝试。建议使用页数较少的文件。`);
+                    alert(`您的 PDF 共 ${totalPages} 页，处理可能需要一点时间。`);
                 }
                 totalPagesSpan.innerText = `${totalPages} 页`;
-                
+
                 const pagesData = [];
-                // 依次渲染每一页
+
                 for (let i = 1; i <= totalPages; i++) {
-                    setProgressText(`渲染第 ${i} / ${totalPages} 页，生成高清图片...`);
+                    setProgressText(`正在渲染第 ${i} / ${totalPages} 页...`);
                     const page = await pdf.getPage(i);
-                    // 使用较高缩放保证文字清晰 (scale = 1.8 兼顾清晰和性能)
                     const scale = 1.8;
                     const viewport = page.getViewport({ scale: scale });
-                    
-                    // 创建 canvas
+
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.width = viewport.width;
                     canvas.height = viewport.height;
-                    
+
                     await page.render({
                         canvasContext: context,
                         viewport: viewport,
                         intent: 'display'
                     }).promise;
-                    
-                    const imageDataUrl = canvas.toDataURL('image/png');
+
+                    const pngDataUrl = canvasToPNGDataURL(canvas);
+                    const jpgBlob = await canvasToJPGBlob(canvas, 0.85);
+                    const jpgUrl = URL.createObjectURL(jpgBlob);
+
                     pagesData.push({
                         pageNum: i,
-                        imageData: imageDataUrl,
+                        pngDataUrl: pngDataUrl,
+                        jpgBlob: jpgBlob,
+                        jpgUrl: jpgUrl,
                         width: Math.round(viewport.width),
                         height: Math.round(viewport.height)
                     });
                 }
-                
+
                 currentPages = pagesData;
                 setProgressText('');
                 loadingArea.style.display = 'none';
-                
+
                 if (currentPages.length === 0) {
-                    alert('未能提取任何页面，请检查PDF文件');
+                    alert('未能提取任何页面，PDF 文件可能已损坏或加密。');
                     return false;
                 }
-                
-                // 显示信息栏和画廊
+
                 pdfInfoBar.style.display = 'block';
                 renderPages();
-                renderBatchButton();
+                renderBatchButtons();
                 return true;
-                
+
             } catch (err) {
-                console.error('转换异常:', err);
+                console.error('转换错误:', err);
                 loadingArea.style.display = 'none';
-                alert('PDF 处理失败：' + (err.message || '文件可能损坏或加密，请尝试其他PDF'));
+                alert('PDF 转换失败：' + (err.message || '文件可能已损坏或受密码保护。'));
                 return false;
             }
         }
 
-        // 上传文件处理
+        // 处理文件上传
         function handleFile(file) {
             if (!file) return;
             convertPdfToImages(file).catch(e => {
                 console.warn(e);
-                alert('转换出错，请刷新页面重试');
+                alert('转换出错，请刷新页面后重试。');
                 loadingArea.style.display = 'none';
             });
         }
 
-        // 上传区域点击
+        // 事件监听
         uploadZone.addEventListener('click', (e) => {
-            if(e.target === uploadZone || uploadZone.contains(e.target)) {
+            if (uploadZone.contains(e.target)) {
                 fileInput.click();
             }
         });
+
         fileInput.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
                 handleFile(e.target.files[0]);
@@ -626,25 +705,23 @@
                 if (file.type === 'application/pdf') {
                     handleFile(file);
                 } else {
-                    alert('请拖入 PDF 文件');
+                    alert('请拖入一个有效的 PDF 文件。');
                 }
             }
         });
 
-        // 重置按钮：清空并回到初始状态
+        // 重置按钮
         if (resetBtn) {
             resetBtn.addEventListener('click', () => {
                 resetUI();
-                // 额外重置上传区域样式
                 uploadZone.style.borderColor = '#cbd5e1';
                 uploadZone.style.background = '#fafcff';
                 fileInput.value = '';
                 currentPages = [];
-                currentPdfDoc = null;
             });
         }
 
-        // 初始时隐藏所有信息栏
+        // 初始重置
         resetUI();
     })();
 </script>

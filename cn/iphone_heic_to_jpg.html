@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>HEIC to JPG Converter - Convert Apple Photos to JPG | 100% Local</title>
+    <title>HEIC/HEIF/LIVP 转 JPG - 苹果照片转换工具 | 100% 本地处理</title>
     <meta name="description" content="免费在线将苹果 iPhone 拍摄的 HEIC/HEIF/LIVP 格式照片转换为 JPG。无需安装任何软件，即可在 Windows 上预览和转换苹果设备照片。支持批量转换，100% 本地处理，不上传服务器，不存储任何数据。隐私安全的 HEIC 转 JPG 工具。">
     <style>
         * {
@@ -331,58 +331,62 @@
 </head>
 <body>
 <div class="container">
-    <h1>HEIC/HEIF/LIVP to JPG Converter <span class="badge">100% Local</span></h1>
-    <p class="subtitle">Convert Apple iPhone HEIC, HEIF, and LIVP photos to JPG format. All processing happens in your browser - no upload, no server storage.</p>
+    <h1>HEIC/HEIF/LIVP 转 JPG <span class="badge">100% 本地处理</span></h1>
+    <p class="subtitle">将苹果 iPhone 拍摄的 HEIC、HEIF、LIVP 照片转换为 JPG 格式。所有处理均在您的浏览器中完成 - 不上传，无存储。</p>
 
     <div class="upload-area" id="upload-area">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 21h14"/>
             <rect x="4" y="14" width="16" height="4" rx="1"/>
         </svg>
-        <p style="margin: 12px 0; font-weight: 500;">Click or drag & drop HEIC/HEIF/LIVP files here</p>
+        <p style="margin: 12px 0; font-weight: 500;">点击或拖拽 HEIC/HEIF/LIVP 文件至此</p>
         <input type="file" id="file-input" accept=".heic,.heif,.livp,image/heic,image/heif" multiple style="display: none;">
-        <p style="font-size: 12px; color: #999; margin-top: 8px;">Supports HEIC, HEIF, LIVP | Max 20 files | 50MB per file</p>
+        <p style="font-size: 12px; color: #999; margin-top: 8px;">支持 HEIC、HEIF、LIVP 格式 | 最多 20 个文件 | 单文件不超过 50MB</p>
     </div>
 
     <div class="settings-panel">
-        <h3>⚙️ Conversion Settings</h3>
+        <h3>⚙️ 转换设置</h3>
         <div class="quality-row">
-            <label>JPG Quality:</label>
+            <label>JPG 画质：</label>
             <input type="range" id="jpg-quality" min="30" max="100" value="85">
             <span class="quality-value" id="quality-value">85%</span>
         </div>
         <div class="warning-tip">
-            💡 <strong>Note:</strong> LIVP (Live Photos) are ZIP archives containing a HEIC image and a MOV video. This tool extracts the HEIC image and converts it to JPG.
+            💡 <strong>说明：</strong> LIVP（实况照片）是包含 HEIC 图片和 MOV 视频的 ZIP 压缩包。本工具会提取其中的 HEIC 图片并转换为 JPG。
         </div>
     </div>
 
     <div class="results-section" id="results-section">
         <div class="results-header">
-            <h3>📥 Converted Images</h3>
-            <button class="btn-clear" id="clear-all-results">🗑️ Clear All</button>
+            <h3>📥 转换结果</h3>
+            <button class="btn-clear" id="clear-all-results">🗑️ 清空全部</button>
         </div>
         <div class="results-grid" id="results-grid">
-            <div class="loading-indicator">Drop HEIC/HEIF/LIVP files here to start conversion...</div>
+            <div class="loading-indicator">拖拽 HEIC/HEIF/LIVP 文件至此开始转换...</div>
         </div>
     </div>
 
     <div class="faq-section">
-        <h3>❓ Frequently Asked Questions</h3>
+        <h3>❓ 常见问题</h3>
         <div class="faq-item">
-            <h4>What are HEIC, HEIF, and LIVP files?</h4>
-            <p><span class="highlight">HEIC/HEIF</span> is Apple's default photo format on iPhones (iOS 11 and later). <span class="highlight">LIVP</span> is Apple's Live Photo format - a ZIP archive containing a HEIC image and a MOV video.</p>
+            <h4>什么是 HEIC、HEIF 和 LIVP 文件？</h4>
+            <p><span class="highlight">HEIC/HEIF</span> 是苹果 iPhone 的默认照片格式（iOS 11 及之后）。<span class="highlight">LIVP</span> 是苹果的实况照片格式 - 一个包含 HEIC 图片和 MOV 视频的 ZIP 压缩包。</p>
         </div>
         <div class="faq-item">
-            <h4>Is my photo uploaded to your server?</h4>
-            <p>No, absolutely not. Our converter works <span class="highlight">100% locally in your browser</span>. Your photos never leave your device.</p>
+            <h4>我的照片会被上传到服务器吗？</h4>
+            <p>绝对不会！本转换工具 <span class="highlight">100% 在您的浏览器本地运行</span>，照片永不离开您的设备，确保隐私安全。</p>
         </div>
         <div class="faq-item">
-            <h4>What happens to my Live Photos (LIVP)?</h4>
-            <p>LIVP files are ZIP archives. This tool extracts the <span class="highlight">HEIC image</span> from the archive and converts it to JPG. The video component is not preserved.</p>
+            <h4>实况照片（LIVP）转换后会怎样？</h4>
+            <p>LIVP 文件是 ZIP 压缩包。本工具会从中<span class="highlight">提取 HEIC 图片</span>并转换为 JPG。视频部分不会被保留。</p>
         </div>
         <div class="faq-item">
-            <h4>Why convert HEIC to JPG?</h4>
-            <p>JPG is a universal format supported by all devices, websites, and software. Converting HEIC to JPG ensures your photos can be viewed anywhere.</p>
+            <h4>为什么要把 HEIC 转换成 JPG？</h4>
+            <p>JPG 是通用格式，几乎所有设备、网站和软件都支持。将 HEIC 转换为 JPG 可以确保您的照片在任何地方都能正常查看。</p>
+        </div>
+        <div class="faq-item">
+            <h4>支持批量转换吗？</h4>
+            <p>支持！可以一次性选择多个 HEIC/HEIF/LIVP 文件，工具会依次处理并显示所有转换结果。</p>
         </div>
     </div>
 </div>
@@ -445,7 +449,7 @@
                     }
                     
                     if (!heicFile) {
-                        reject(new Error('No HEIC file found inside LIVP archive'));
+                        reject(new Error('LIVP 压缩包中未找到 HEIC 图片'));
                         return;
                     }
                     
@@ -454,11 +458,11 @@
                     resolve(heicBlob);
                     
                 } catch (error) {
-                    console.error('LIVP extraction error:', error);
-                    reject(new Error('Failed to extract HEIC from LIVP file: ' + error.message));
+                    console.error('LIVP 提取错误:', error);
+                    reject(new Error('从 LIVP 文件中提取 HEIC 失败: ' + error.message));
                 }
             };
-            reader.onerror = () => reject(new Error('Failed to read LIVP file'));
+            reader.onerror = () => reject(new Error('读取 LIVP 文件失败'));
             reader.readAsArrayBuffer(file);
         });
     }
@@ -480,8 +484,8 @@
                 }
                 resolve(jpgBlob);
             }).catch(error => {
-                console.error('HEIC conversion error:', error);
-                reject(new Error('Failed to convert HEIC to JPG: ' + error.message));
+                console.error('HEIC 转换错误:', error);
+                reject(new Error('HEIC 转 JPG 失败: ' + error.message));
             });
         });
     }
@@ -500,7 +504,7 @@
                 // HEIC/HEIF 文件：直接使用
                 heicBlob = file;
             } else {
-                throw new Error('Unsupported file format: ' + ext);
+                throw new Error('不支持的文件格式: ' + ext);
             }
             
             // 转换为 JPG
@@ -521,12 +525,12 @@
             };
             
         } catch (error) {
-            console.error(`Error processing ${file.name}:`, error);
+            console.error(`处理 ${file.name} 时出错:`, error);
             return {
                 success: false,
                 originalName: file.name,
                 originalSize: file.size,
-                errorMessage: error.message || 'Conversion failed'
+                errorMessage: error.message || '转换失败'
             };
         }
     }
@@ -558,7 +562,7 @@
         if (files.length > 0) {
             await processFiles(files);
         } else if (e.dataTransfer.files.length > 0) {
-            alert('Please upload valid HEIC, HEIF, or LIVP files');
+            alert('请上传有效的 HEIC、HEIF 或 LIVP 文件');
         }
     });
 
@@ -569,7 +573,7 @@
                 return ext === 'heic' || ext === 'heif' || ext === 'livp';
             });
             if (files.length !== e.target.files.length) {
-                alert('Some files were skipped. Only HEIC, HEIF, and LIVP files are supported.');
+                alert('部分文件已被跳过。仅支持 HEIC、HEIF 和 LIVP 格式。');
             }
             await processFiles(files);
         }
@@ -582,13 +586,13 @@
         
         const currentCount = convertedResults.length;
         if (currentCount + files.length > 20) {
-            alert(`Maximum 20 files allowed. You already have ${currentCount}, can add ${20 - currentCount} more.`);
+            alert(`最多支持 20 个文件。当前已有 ${currentCount} 个，最多还可添加 ${20 - currentCount} 个。`);
             return;
         }
         
         for (const file of files) {
             if (file.size > 50 * 1024 * 1024) {
-                alert(`File "${file.name}" exceeds 50MB limit`);
+                alert(`文件 "${file.name}" 超过 50MB 限制`);
                 return;
             }
         }
@@ -599,7 +603,7 @@
     // 转换文件
     async function convertFiles(files) {
         if (isConverting) {
-            alert('Conversion in progress, please wait...');
+            alert('转换正在进行中，请稍候...');
             return;
         }
         
@@ -608,7 +612,7 @@
         resultsSection.style.display = 'block';
         resultsGrid.innerHTML = `
             <div class="loading-indicator">
-                <div class="spinner-small"></div> Processing ${files.length} file(s)...
+                <div class="spinner-small"></div> 正在处理 ${files.length} 个文件...
             </div>
         `;
         
@@ -620,7 +624,7 @@
             
             resultsGrid.innerHTML = `
                 <div class="loading-indicator">
-                    <div class="spinner-small"></div> Processing ${i + 1}/${files.length}: ${escapeHtml(file.name)}
+                    <div class="spinner-small"></div> 处理中 ${i + 1}/${files.length}: ${escapeHtml(file.name)}
                 </div>
             `;
             
@@ -661,7 +665,7 @@
                         <div style="font-size: 48px;">⚠️</div>
                         <div class="result-name">${escapeHtml(result.originalName)}</div>
                         <div class="result-sizes">
-                            <span class="size-original">Original: ${formatFileSize(result.originalSize)}</span>
+                            <span class="size-original">原始大小: ${formatFileSize(result.originalSize)}</span>
                         </div>
                         <div class="error-message">${escapeHtml(result.errorMessage)}</div>
                     </div>
@@ -675,11 +679,11 @@
                     <img class="result-preview" src="${result.convertedUrl}" alt="${escapeHtml(result.downloadName)}">
                     <div class="result-name" title="${escapeHtml(result.originalName)}">${escapeHtml(result.originalName)}</div>
                     <div class="result-sizes">
-                        <span class="size-original">Original: ${formatFileSize(result.originalSize)}</span><br>
+                        <span class="size-original">原始: ${formatFileSize(result.originalSize)}</span><br>
                         <span class="size-converted">JPG: ${formatFileSize(result.convertedSize)}</span>
-                        <span class="saved-badge">${percentChange > 0 ? '↓ ' + percentChange + '%' : (percentChange < 0 ? '↑ ' + Math.abs(percentChange) + '%' : 'Same size')}</span>
+                        <span class="saved-badge">${percentChange > 0 ? '↓ ' + percentChange + '%' : (percentChange < 0 ? '↑ ' + Math.abs(percentChange) + '%' : '体积相同')}</span>
                     </div>
-                    <button class="download-link" data-id="${result.id}">📥 Download JPG</button>
+                    <button class="download-link" data-id="${result.id}">📥 下载 JPG</button>
                 `;
             }
             
@@ -716,7 +720,7 @@
         });
         convertedResults = [];
         resultsSection.style.display = 'none';
-        resultsGrid.innerHTML = '<div class="loading-indicator">Drop HEIC/HEIF/LIVP files here to start conversion...</div>';
+        resultsGrid.innerHTML = '<div class="loading-indicator">拖拽 HEIC/HEIF/LIVP 文件至此开始转换...</div>';
     }
 
     // 工具函数
